@@ -1,0 +1,8 @@
+<Solution>
+  <Project Path="BookShareHub.Application/BookShareHub.Application.csproj" Id="d6845ced-4641-45e5-9fb2-bc9bc3319312" />
+  <Project Path="BookShareHub.AuthAPI/BookShareHub.AuthAPI.csproj" Id="1bbb8052-1388-46b5-9710-9a2fefd4c07c" />
+  <Project Path="BookShareHub.BooksAPI/BookShareHub.BooksAPI.csproj" Id="65658d6c-d150-4ddc-8714-e60e3d663ddf" />
+  <Project Path="BookShareHub.Domain/BookShareHub.Domain.csproj" Id="3b9fb189-fc07-428e-afc2-80c6ab8c988d" />
+  <Project Path="BookShareHub.Infrastructure/BookShareHub.Infrastructure.csproj" Id="ff3590b2-334d-47da-9b8a-d7ec2f0eb4db" />
+  <Project Path="BookShareHub.Tests/BookShareHub.Tests.csproj" Id="3397f157-3667-4dcd-bc98-a012f6420d31" />
+</Solution>
