@@ -1,4 +1,5 @@
 ﻿using BookShareHub.Application.Books.DTOs;
+using BookShareHub.Domain.Books.Entities;
 using BookShareHub.Domain.Books.Repositories;
 using System;
 using System.Collections.Generic;
@@ -15,9 +16,21 @@ namespace BookShareHub.Application.Books.Services
             _bookRepository = bookRepository;
         }
 
-        public async Task<CreateBookDto?> CreateAsync(CreateBookDto dto)
+        public async Task<Book> CreateAsync(CreateBookDto dto)
         {
-            throw new NotImplementedException();
+            var book = new Book
+            {
+                Id = Guid.NewGuid(),
+                Title = dto.Title,
+                Author = dto.Author,
+                Description = dto.Description,
+                Available = dto.Available
+            };
+
+            await _bookRepository.AddAsync(book);
+            await _bookRepository.SaveChangesAsync();
+
+            return book;
         }
     }
 }
