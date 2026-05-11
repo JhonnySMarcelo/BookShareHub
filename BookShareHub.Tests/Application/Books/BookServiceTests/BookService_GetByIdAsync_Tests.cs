@@ -53,5 +53,21 @@ namespace BookShareHub.Tests.Application.Books.BookServiceTests
             // Assert
             _bookRepoMock.Verify(r => r.GetByIdAsync(It.IsAny<Guid>()), Times.Never);
         }
+
+        [Fact]
+        public async Task Should_Return_Null_When_Book_Not_Found()
+        {
+            // Arrange
+            var id = Guid.NewGuid();
+            _bookRepoMock.Setup(r => r.GetByIdAsync(id))
+                         .ReturnsAsync((Book?)null);
+
+            // Act
+            var result = await _service.GetByIdAsync(id);
+
+            // Assert
+            Assert.Null(result);
+            _bookRepoMock.Verify(r => r.GetByIdAsync(id), Times.Once);
+        }
     }
 }
