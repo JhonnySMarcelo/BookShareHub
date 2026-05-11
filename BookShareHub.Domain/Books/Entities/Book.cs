@@ -76,5 +76,6 @@ namespace BookShareHub.Domain.Books.Entities
             Description = description;
             Available = available;
             OwnerId = ownerId;
+        }
     }
 }

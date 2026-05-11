@@ -64,5 +64,26 @@ namespace BookShareHub.BooksAPI.Controllers
 
             return Ok(book);
         }
+
+        /// <summary>
+        /// Retrieves all books in the system.
+        /// </summary>
+        /// <returns>
+        /// Returns a list of <see cref="Book"/> with status code 200 if any are found,
+        /// or 404 if no books exist.
+        /// </returns>
+        [HttpGet]
+        [ProducesResponseType(typeof(IEnumerable<Book>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<IEnumerable<Book>>> GetAll()
+        {
+            var books = await _bookService.GetAllAsync();
+
+            if (books == null || !books.Any())
+                return NotFound();
+
+            return Ok(books);
+        }
+
     }
 }

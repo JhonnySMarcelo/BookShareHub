@@ -70,5 +70,42 @@ namespace BookShareHub.Infrastructure.Books.Repositories
 
             return null;
         }
+
+        public async Task<List<Book>> GetAllAsync()
+        {
+            var books = new List<Book>();
+
+            using var connection = new SqlConnection(_connectionString);
+            await connection.OpenAsync();
+
+            var command = new SqlCommand(
+                "SELECT Id, Title, Author, Description, Available, CreationTime, OwnerId, BorrowerId FROM Books",
+                connection
+            );
+
+            using var reader = await command.ExecuteReaderAsync();
+
+            while (await reader.ReadAsync())
+            {
+                var book = new Book(
+                    title: reader.GetString(reader.GetOrdinal("Title")),
+                    author: reader.GetString(reader.GetOrdinal("Author")),
+                    description: reader.IsDBNull(reader.GetOrdinal("Description")) ? null : reader.GetString(reader.GetOrdinal("Description")),
+                    available: reader.GetBoolean(reader.GetOrdinal("Available")),
+                    ownerId: reader.GetGuid(reader.GetOrdinal("OwnerId"))
+                );
+
+                typeof(Book).GetProperty(nameof(Book.Id))?.SetValue(book, reader.GetGuid(reader.GetOrdinal("Id")));
+                typeof(Book).GetProperty(nameof(Book.CreationTime))?.SetValue(book, reader.GetDateTime(reader.GetOrdinal("CreationTime")));
+
+                var borrowerIdOrdinal = reader.GetOrdinal("BorrowerId");
+                Guid? borrowerId = reader.IsDBNull(borrowerIdOrdinal) ? null : reader.GetGuid(borrowerIdOrdinal);
+                typeof(Book).GetProperty(nameof(Book.BorrowerId))?.SetValue(book, borrowerId);
+
+                books.Add(book);
+            }
+
+            return books;
+        }
     }
 }

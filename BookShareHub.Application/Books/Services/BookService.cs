@@ -26,7 +26,7 @@ namespace BookShareHub.Application.Books.Services
             await _bookRepository.AddAsync(book);
 
             return book;
-        }
+        }      
 
         public async Task<Book?> GetByIdAsync(Guid id)
         {
@@ -35,5 +35,13 @@ namespace BookShareHub.Application.Books.Services
 
             return await _bookRepository.GetByIdAsync(id);
         }
+
+        public async Task<List<Book>> GetAllAsync()
+        {
+            var books = await _bookRepository.GetAllAsync();
+
+            return books?.ToList() ?? new List<Book>();
+        }
+
     }
 }
