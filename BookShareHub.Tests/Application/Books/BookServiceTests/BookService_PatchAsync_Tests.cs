@@ -213,5 +213,63 @@ namespace BookShareHub.Tests.Application.Books.BookServiceTests
 
             _bookRepoMock.Verify(r => r.PatchAsync(It.IsAny<Book>()), Times.Never);
         }
+
+        [Fact]
+        public async Task Should_Not_Update_When_Dto_Has_No_Fields()
+        {
+            // Arrange
+            var book = new Book("Title", "Author", "Desc", true, Guid.NewGuid());
+            _bookRepoMock.Setup(r => r.GetByIdAsync(book.Id)).ReturnsAsync(book);
+            _bookRepoMock.Setup(r => r.PatchAsync(book)).ReturnsAsync(book);
+            var dto = new UpdateBookDto();
+
+            // Act
+            var result = await _service.PatchAsync(book.Id, dto);
+
+            // Assert
+            Assert.Equal("Title", result.Title);
+            Assert.Equal("Author", result.Author);
+            Assert.Equal("Desc", result.Description);
+            Assert.True(result.Available);
+            _bookRepoMock.Verify(r => r.PatchAsync(book), Times.Once);
+        }
+
+        [Fact]
+        public async Task Should_Ignore_Null_Fields_In_Dto()
+        {
+            // Arrange
+            var book = new Book("Title", "Author", "Desc", true, Guid.NewGuid());
+            _bookRepoMock.Setup(r => r.GetByIdAsync(book.Id)).ReturnsAsync(book);
+            _bookRepoMock.Setup(r => r.PatchAsync(book)).ReturnsAsync(book);
+            var dto = new UpdateBookDto { Title = null, Author = null };
+
+            // Act
+            var result = await _service.PatchAsync(book.Id, dto);
+
+            // Assert
+            Assert.Equal("Title", result.Title);
+            Assert.Equal("Author", result.Author);
+            Assert.Equal("Desc", result.Description);
+            Assert.True(result.Available);
+            _bookRepoMock.Verify(r => r.PatchAsync(book), Times.Once);
+        }
+
+        [Fact]
+        public async Task Should_Clear_Description_When_Empty_String_Provided()
+        {
+            // Arrange
+            var book = new Book("Title", "Author", "Old Desc", true, Guid.NewGuid());
+            _bookRepoMock.Setup(r => r.GetByIdAsync(book.Id)).ReturnsAsync(book);
+            _bookRepoMock.Setup(r => r.PatchAsync(book)).ReturnsAsync(book);
+            var dto = new UpdateBookDto { Description = "" };
+
+            // Act
+            var result = await _service.PatchAsync(book.Id, dto);
+
+            // Assert
+            Assert.Equal("", result.Description);
+            _bookRepoMock.Verify(r => r.PatchAsync(book), Times.Once);
+        }
+
     }
 }
