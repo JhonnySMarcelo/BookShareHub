@@ -50,10 +50,13 @@ namespace BookShareHub.Domain.Books.Entities
         public Book(string title, string author, string? description, bool available, Guid ownerId)
         {
             if (string.IsNullOrWhiteSpace(title))
-                throw new ArgumentException("Book title is required.");
+                throw new ArgumentException("Book Title is required.");
 
             if (string.IsNullOrWhiteSpace(author))
-                throw new ArgumentException("Book author is required.");
+                throw new ArgumentException("Book Author is required.");
+
+            if (ownerId == Guid.Empty)
+                throw new ArgumentException("Book OwnerId is required.");
 
             Title = title;
             Author = author;
