@@ -5,6 +5,8 @@ namespace BookShareHub.Domain.Books.Entities
     /// </summary>
     public class Book
     {
+        private const int MaxTitleLength = 255;
+
         /// <summary>
         /// The unique identifier of the book.
         /// </summary>
@@ -51,6 +53,9 @@ namespace BookShareHub.Domain.Books.Entities
         {
             if (string.IsNullOrWhiteSpace(title))
                 throw new ArgumentException("Book Title is required.");
+
+            if (title.Length > MaxTitleLength)
+                throw new ArgumentOutOfRangeException(nameof(title), $"Title cannot exceed {MaxTitleLength} characters.");
 
             if (string.IsNullOrWhiteSpace(author))
                 throw new ArgumentException("Book Author is required.");
