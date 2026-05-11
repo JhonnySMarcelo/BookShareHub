@@ -43,5 +43,12 @@ namespace BookShareHub.BooksAPI.Controllers
             return Created($"/api/books/{book.Id}", book);
         }
 
+        [HttpGet("{id:guid}")]
+        [ProducesResponseType(typeof(Book), StatusCodes.Status200OK)]
+        public async Task<ActionResult<Book>> GetById(Guid id)
+        {
+            var book = await _bookService.GetByIdAsync(id);
+            return Ok(book);
+        }
     }
 }
