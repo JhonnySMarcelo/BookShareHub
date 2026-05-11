@@ -40,5 +40,18 @@ namespace BookShareHub.Tests.Application.Books.BookServiceTests
             Assert.Equal(book.Author, result.Author);
             _bookRepoMock.Verify(r => r.GetByIdAsync(book.Id), Times.Once);
         }
+
+        [Fact]
+        public async Task Should_Throw_ArgumentException_When_Id_Is_Empty()
+        {
+            // Arrange
+            var emptyId = Guid.Empty;
+
+            // Act & Assert
+            await Assert.ThrowsAsync<ArgumentException>(() => _service.GetByIdAsync(emptyId));
+
+            // Assert
+            _bookRepoMock.Verify(r => r.GetByIdAsync(It.IsAny<Guid>()), Times.Never);
+        }
     }
 }
