@@ -8,6 +8,5 @@ namespace BookShareHub.Domain.Books.Repositories
     public interface IBookRepository
     {
         Task AddAsync(Book book);
-        Task SaveChangesAsync();
     }
 }

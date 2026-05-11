@@ -26,7 +26,8 @@ namespace BookShareHub.Tests.Application.Books.BookServiceTests
                 Title = "Clean Architecture",
                 Author = "Robert Martin",
                 Description = "Building upon the success of...",
-                Available = true
+                Available = true,
+                OwnerId = Guid.NewGuid()
             };
 
             _bookRepoMock.Setup(r => r.AddAsync(It.IsAny<Book>()))

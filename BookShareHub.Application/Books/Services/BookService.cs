@@ -13,22 +13,17 @@ namespace BookShareHub.Application.Books.Services
 
         public BookService(IBookRepository bookRepository)
         {
-            _bookRepository = bookRepository;
+            _bookRepository = bookRepository ?? throw new ArgumentNullException(nameof(bookRepository));
         }
 
         public async Task<Book> CreateAsync(CreateBookDto dto)
         {
-            var book = new Book
-            {
-                Id = Guid.NewGuid(),
-                Title = dto.Title,
-                Author = dto.Author,
-                Description = dto.Description,
-                Available = dto.Available
-            };
+            if (dto == null)
+                throw new ArgumentNullException(nameof(dto));
+
+            var book = new Book(dto.Title, dto.Author, dto.Description, dto.Available, dto.OwnerId);
 
             await _bookRepository.AddAsync(book);
-            await _bookRepository.SaveChangesAsync();
 
             return book;
         }
