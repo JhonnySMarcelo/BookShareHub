@@ -30,6 +30,9 @@ namespace BookShareHub.Application.Books.Services
 
         public async Task<Book?> GetByIdAsync(Guid id)
         {
+            if (id == Guid.Empty)
+                throw new ArgumentException("Id cannot be empty.", nameof(id));
+
             return await _bookRepository.GetByIdAsync(id);
         }
     }
