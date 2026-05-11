@@ -23,6 +23,7 @@ namespace BookShareHub.Tests.Application.Books.BookServiceTests
             // Arrange
             var book = new Book("Old Title", "Author", "Desc", true, Guid.NewGuid());
             _bookRepoMock.Setup(r => r.GetByIdAsync(book.Id)).ReturnsAsync(book);
+            _bookRepoMock.Setup(r => r.PatchAsync(book)).ReturnsAsync(book);
             var dto = new UpdateBookDto { Title = "New Title" };
 
             // Act
@@ -42,6 +43,7 @@ namespace BookShareHub.Tests.Application.Books.BookServiceTests
             // Arrange
             var book = new Book("Title", "Old Author", "Desc", true, Guid.NewGuid());
             _bookRepoMock.Setup(r => r.GetByIdAsync(book.Id)).ReturnsAsync(book);
+            _bookRepoMock.Setup(r => r.PatchAsync(book)).ReturnsAsync(book);
             var dto = new UpdateBookDto { Author = "New Author" };
 
             // Act
@@ -61,6 +63,7 @@ namespace BookShareHub.Tests.Application.Books.BookServiceTests
             // Arrange
             var book = new Book("Title", "Author", "Old Desc", true, Guid.NewGuid());
             _bookRepoMock.Setup(r => r.GetByIdAsync(book.Id)).ReturnsAsync(book);
+            _bookRepoMock.Setup(r => r.PatchAsync(book)).ReturnsAsync(book);
             var dto = new UpdateBookDto { Description = "New Desc" };
 
             // Act
@@ -80,6 +83,7 @@ namespace BookShareHub.Tests.Application.Books.BookServiceTests
             // Arrange
             var book = new Book("Title", "Author", "Desc", true, Guid.NewGuid());
             _bookRepoMock.Setup(r => r.GetByIdAsync(book.Id)).ReturnsAsync(book);
+            _bookRepoMock.Setup(r => r.PatchAsync(book)).ReturnsAsync(book);
             var dto = new UpdateBookDto { Available = false };
 
             // Act
