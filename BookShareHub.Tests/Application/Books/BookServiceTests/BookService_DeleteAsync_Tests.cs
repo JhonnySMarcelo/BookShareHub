@@ -72,6 +72,5 @@ namespace BookShareHub.Tests.Application.Books.BookServiceTests
 
             _bookRepoMock.Verify(r => r.DeleteAsync(It.IsAny<Guid>()), Times.Never);
         }
-
     }
 }

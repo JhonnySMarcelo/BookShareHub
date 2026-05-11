@@ -43,5 +43,21 @@ namespace BookShareHub.Application.Books.Services
             return books?.ToList() ?? new List<Book>();
         }
 
+        public async Task<bool?> DeleteAsync(Guid id)
+        {
+            if (id == Guid.Empty)
+                throw new ArgumentException("Book Id cannot be empty.", nameof(id));
+
+            var book = await _bookRepository.GetByIdAsync(id);
+            if (book == null) return null;
+
+            if (!book.Available)
+                throw new InvalidOperationException("Book is currently borrowed and cannot be deleted.");
+
+            await _bookRepository.DeleteAsync(id);
+
+            return true;
+        }
+
     }
 }

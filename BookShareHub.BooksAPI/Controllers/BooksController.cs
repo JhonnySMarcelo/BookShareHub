@@ -85,5 +85,31 @@ namespace BookShareHub.BooksAPI.Controllers
             return Ok(books);
         }
 
+        /// <summary>
+        /// Deletes a book by its unique identifier.
+        /// </summary>
+        /// <param name="id">
+        /// The unique identifier of the book to be deleted.
+        /// </param>
+        /// <returns>
+        /// Returns:
+        /// - <see cref="StatusCodes.Status204NoContent"/> if the book was successfully deleted.
+        /// - <see cref="StatusCodes.Status404NotFound"/> if the book does not exist.
+        /// - <see cref="ValidationProblemDetails"/> with <see cref="StatusCodes.Status400BadRequest"/> 
+        ///   if the provided <paramref name="id"/> is invalid or the book is unavailable.
+        /// </returns>
+        [HttpDelete("{id:guid}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> Delete(Guid id)
+        {
+            var result = await _bookService.DeleteAsync(id);
+
+            if (result == null)
+                return NotFound();
+
+            return NoContent();
+        }
     }
 }

@@ -107,5 +107,17 @@ namespace BookShareHub.Infrastructure.Books.Repositories
 
             return books;
         }
+
+        public async Task<bool> DeleteAsync(Guid id)
+        {
+            using var connection = new SqlConnection(_connectionString);
+            await connection.OpenAsync();
+
+            var command = new SqlCommand("DELETE FROM Books WHERE Id = @Id", connection);
+            command.Parameters.AddWithValue("@Id", id);
+
+            var rowsAffected = await command.ExecuteNonQueryAsync();
+            return rowsAffected > 0;
+        }
     }
 }
