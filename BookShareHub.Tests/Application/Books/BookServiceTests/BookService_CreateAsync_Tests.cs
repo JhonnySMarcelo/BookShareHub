@@ -115,5 +115,26 @@ namespace BookShareHub.Tests.Application.Books.BookServiceTests
 
             _bookRepoMock.Verify(r => r.AddAsync(It.IsAny<Book>()), Times.Never);
         }
+
+        [Fact]
+        public async Task Should_Throw_ArgumentException_When_OwnerId_Is_Empty()
+        {
+            // Arrange
+            var dto = new CreateBookDto
+            {
+                Title = "Valid Title",
+                Author = "Valid Author",
+                OwnerId = Guid.Empty,
+                Available = true
+            };
+
+            _bookRepoMock.Setup(r => r.AddAsync(It.IsAny<Book>()))
+                         .Returns(Task.CompletedTask);
+
+            // Act & Assert
+            await Assert.ThrowsAsync<ArgumentException>(() => _service.CreateAsync(dto));
+
+            _bookRepoMock.Verify(r => r.AddAsync(It.IsAny<Book>()), Times.Never);
+        }
     }
 }
