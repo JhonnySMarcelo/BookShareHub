@@ -61,6 +61,10 @@ namespace BookShareHub.Infrastructure.Books.Repositories
                 typeof(Book).GetProperty(nameof(Book.Id))?.SetValue(book, reader.GetGuid(reader.GetOrdinal("Id")));
                 typeof(Book).GetProperty(nameof(Book.CreationTime))?.SetValue(book, reader.GetDateTime(reader.GetOrdinal("CreationTime")));
 
+                var borrowerIdOrdinal = reader.GetOrdinal("BorrowerId");
+                Guid? borrowerId = reader.IsDBNull(borrowerIdOrdinal) ? null : reader.GetGuid(borrowerIdOrdinal);
+                typeof(Book).GetProperty(nameof(Book.BorrowerId))?.SetValue(book, borrowerId);
+
                 return book;
             }
 
