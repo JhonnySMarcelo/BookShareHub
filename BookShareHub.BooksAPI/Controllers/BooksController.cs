@@ -43,11 +43,25 @@ namespace BookShareHub.BooksAPI.Controllers
             return Created($"/api/books/{book.Id}", book);
         }
 
+        /// <summary>
+        /// Retrieves a book by its unique identifier.
+        /// </summary>
+        /// <param name="id">The unique identifier of the book.</param>
+        /// <returns>
+        /// Returns the <see cref="Book"/> with status code 200 if found,
+        /// or 404 if not found.
+        /// Validation errors (e.g., empty Guid) are automatically returned as <see cref="ValidationProblemDetails"/> with status code 400.
+        /// </returns>
         [HttpGet("{id:guid}")]
         [ProducesResponseType(typeof(Book), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<Book>> GetById(Guid id)
         {
             var book = await _bookService.GetByIdAsync(id);
+
+            if (book == null) return NotFound();
+
             return Ok(book);
         }
     }
