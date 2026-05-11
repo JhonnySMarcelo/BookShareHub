@@ -69,5 +69,57 @@ namespace BookShareHub.Tests.Application.Books.BookServiceTests
             Assert.Null(result);
             _bookRepoMock.Verify(r => r.GetByIdAsync(id), Times.Once);
         }
+
+        [Fact]
+        public async Task Should_Return_Book_With_BorrowerId_When_Present()
+        {
+            // Arrange
+            var borrowerId = Guid.NewGuid();
+            var book = new Book(
+                title: "Domain-Driven Design",
+                author: "Eric Evans",
+                ownerId: Guid.NewGuid(),
+                available: false,
+                description: "The blue book"
+            );
+            typeof(Book).GetProperty(nameof(Book.BorrowerId))?.SetValue(book, borrowerId);
+
+            _bookRepoMock.Setup(r => r.GetByIdAsync(book.Id))
+                         .ReturnsAsync(book);
+
+            // Act
+            var result = await _service.GetByIdAsync(book.Id);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Equal(borrowerId, result.BorrowerId);
+            _bookRepoMock.Verify(r => r.GetByIdAsync(book.Id), Times.Once);
+        }
+
+        [Fact]
+        public async Task Should_Return_Book_With_Null_BorrowerId_When_Not_Present()
+        {
+            // Arrange
+            var book = new Book(
+                title: "Refactoring",
+                author: "Martin Fowler",
+                ownerId: Guid.NewGuid(),
+                available: true,
+                description: "Improving the design of existing code"
+            );
+            typeof(Book).GetProperty(nameof(Book.BorrowerId))?.SetValue(book, null);
+
+            _bookRepoMock.Setup(r => r.GetByIdAsync(book.Id))
+                         .ReturnsAsync(book);
+
+            // Act
+            var result = await _service.GetByIdAsync(book.Id);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Null(result.BorrowerId);
+            _bookRepoMock.Verify(r => r.GetByIdAsync(book.Id), Times.Once);
+        }
+
     }
 }
