@@ -120,6 +120,5 @@ namespace BookShareHub.Tests.Application.Books.BookServiceTests
             Assert.Null(result.BorrowerId);
             _bookRepoMock.Verify(r => r.GetByIdAsync(book.Id), Times.Once);
         }
-
     }
 }

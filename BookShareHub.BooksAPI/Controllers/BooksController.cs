@@ -40,7 +40,7 @@ namespace BookShareHub.BooksAPI.Controllers
         {
             var book = await _bookService.CreateAsync(request);
 
-            return Created($"/api/books/{book.Id}", book);
+            return CreatedAtAction(nameof(GetById), new { id = book.Id }, book);
         }
 
         /// <summary>
