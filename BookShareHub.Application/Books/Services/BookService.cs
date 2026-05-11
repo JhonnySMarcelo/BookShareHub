@@ -59,5 +59,31 @@ namespace BookShareHub.Application.Books.Services
             return true;
         }
 
+        public async Task<Book?> PatchAsync(Guid id, UpdateBookDto dto)
+        {
+            if (id == Guid.Empty)
+                throw new ArgumentException("Book Id cannot be empty.", nameof(id));
+
+            if (dto == null)
+                throw new ArgumentNullException(nameof(dto));
+
+            var book = await _bookRepository.GetByIdAsync(id);
+            if (book == null)
+                return null;
+
+            if (dto.Title != null)
+                book.UpdateTitle(dto.Title);
+
+            if (dto.Author != null)
+                book.UpdateAuthor(dto.Author);
+
+            if (dto.Description != null)
+                book.UpdateDescription(dto.Description);
+
+            if (dto.Available.HasValue)
+                book.UpdateAvailability(dto.Available.Value);
+
+            return await _bookRepository.PatchAsync(book);
+        }
     }
 }

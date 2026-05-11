@@ -86,6 +86,30 @@ namespace BookShareHub.BooksAPI.Controllers
         }
 
         /// <summary>
+        /// Partially updates a book by its unique identifier.
+        /// </summary>
+        /// <param name="id">The unique identifier of the book.</param>
+        /// <param name="dto">The fields to update (only non-null values will be applied).</param>
+        /// <returns>
+        /// Returns the updated <see cref="Book"/> with status code 200 if successful,
+        /// 404 if not found,
+        /// or 400 if validation fails.
+        /// </returns>
+        [HttpPatch("{id:guid}")]
+        [ProducesResponseType(typeof(Book), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult<Book>> Update(Guid id, [FromBody] UpdateBookDto dto)
+        {
+            var updatedBook = await _bookService.PatchAsync(id, dto);
+
+            if (updatedBook == null)
+                return NotFound();
+
+            return Ok(updatedBook);
+        }
+
+        /// <summary>
         /// Deletes a book by its unique identifier.
         /// </summary>
         /// <param name="id">

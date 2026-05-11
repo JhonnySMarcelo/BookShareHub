@@ -108,6 +108,52 @@ namespace BookShareHub.Infrastructure.Books.Repositories
             return books;
         }
 
+        public async Task<Book?> PatchAsync(Book book)
+        {
+            using var connection = new SqlConnection(_connectionString);
+            await connection.OpenAsync();
+
+            var updates = new List<string>();
+            var command = new SqlCommand();
+            command.Connection = connection;
+
+            if (book.Title != null)
+            {
+                updates.Add("Title = @Title");
+                command.Parameters.AddWithValue("@Title", book.Title);
+            }
+            if (book.Author != null)
+            {
+                updates.Add("Author = @Author");
+                command.Parameters.AddWithValue("@Author", book.Author);
+            }
+            if (book.Description != null)
+            {
+                updates.Add("Description = @Description");
+                command.Parameters.AddWithValue("@Description", book.Description);
+            }
+
+            updates.Add("Available = @Available");
+            command.Parameters.AddWithValue("@Available", book.Available);
+
+            updates.Add("OwnerId = @OwnerId");
+            command.Parameters.AddWithValue("@OwnerId", book.OwnerId);
+
+            updates.Add("BorrowerId = @BorrowerId");
+            command.Parameters.AddWithValue("@BorrowerId", book.BorrowerId == null ? DBNull.Value : book.BorrowerId);
+
+            if (!updates.Any())
+                return await GetByIdAsync(book.Id);
+
+            command.CommandText = $"UPDATE Books SET {string.Join(", ", updates)} WHERE Id = @Id";
+            command.Parameters.AddWithValue("@Id", book.Id);
+
+            var rowsAffected = await command.ExecuteNonQueryAsync();
+            if (rowsAffected == 0) return null;
+
+            return await GetByIdAsync(book.Id);
+        }
+
         public async Task<bool> DeleteAsync(Guid id)
         {
             using var connection = new SqlConnection(_connectionString);

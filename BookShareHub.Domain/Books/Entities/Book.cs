@@ -77,5 +77,40 @@ namespace BookShareHub.Domain.Books.Entities
             Available = available;
             OwnerId = ownerId;
         }
+
+        public void UpdateTitle(string title)
+        {
+            if (string.IsNullOrWhiteSpace(title))
+                throw new ArgumentException("Book Title is required.");
+
+            if (title.Length > MaxTitleLength)
+                throw new ArgumentOutOfRangeException(nameof(title), $"Title cannot exceed {MaxTitleLength} characters.");
+
+            Title = title;
+        }
+
+        public void UpdateAuthor(string author)
+        {
+            if (string.IsNullOrWhiteSpace(author))
+                throw new ArgumentException("Book Author is required.");
+
+            if (author.Length > MaxAuthorLength)
+                throw new ArgumentOutOfRangeException(nameof(author), $"Author cannot exceed {MaxAuthorLength} characters.");
+
+            Author = author;
+        }
+
+        public void UpdateDescription(string? description)
+        {
+            if (description != null && description.Length > MaxDescriptionLength)
+                throw new ArgumentOutOfRangeException(nameof(description), $"Description cannot exceed {MaxDescriptionLength} characters.");
+
+            Description = description;
+        }
+
+        public void UpdateAvailability(bool available)
+        {
+            Available = available;
+        }
     }
 }
