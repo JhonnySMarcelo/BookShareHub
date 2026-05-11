@@ -34,5 +34,37 @@ namespace BookShareHub.Infrastructure.Books.Repositories
 
             await command.ExecuteNonQueryAsync();
         }
+
+        public async Task<Book?> GetByIdAsync(Guid id)
+        {
+            using var connection = new SqlConnection(_connectionString);
+            await connection.OpenAsync();
+
+            var command = new SqlCommand(
+                "SELECT Id, Title, Author, Description, Available, CreationTime, OwnerId, BorrowerId " +
+                "FROM Books WHERE Id = @Id", connection);
+
+            command.Parameters.AddWithValue("@Id", id);
+
+            using var reader = await command.ExecuteReaderAsync();
+
+            if (await reader.ReadAsync())
+            {
+                var book = new Book(
+                    title: reader.GetString(reader.GetOrdinal("Title")),
+                    author: reader.GetString(reader.GetOrdinal("Author")),
+                    description: reader.IsDBNull(reader.GetOrdinal("Description")) ? null : reader.GetString(reader.GetOrdinal("Description")),
+                    available: reader.GetBoolean(reader.GetOrdinal("Available")),
+                    ownerId: reader.GetGuid(reader.GetOrdinal("OwnerId"))
+                );
+
+                typeof(Book).GetProperty(nameof(Book.Id))?.SetValue(book, reader.GetGuid(reader.GetOrdinal("Id")));
+                typeof(Book).GetProperty(nameof(Book.CreationTime))?.SetValue(book, reader.GetDateTime(reader.GetOrdinal("CreationTime")));
+
+                return book;
+            }
+
+            return null;
+        }
     }
 }

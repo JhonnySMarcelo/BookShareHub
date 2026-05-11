@@ -27,5 +27,10 @@ namespace BookShareHub.Application.Books.Services
 
             return book;
         }
+
+        public async Task<Book?> GetByIdAsync(Guid id)
+        {
+            return await _bookRepository.GetByIdAsync(id);
+        }
     }
 }
