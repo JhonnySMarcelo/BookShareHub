@@ -42,5 +42,32 @@ namespace BookShareHub.Tests.Application.Books.BookServiceTests
             Assert.Equal(dto.Author, result.Author);
             _bookRepoMock.Verify(r => r.AddAsync(It.IsAny<Book>()), Times.Once);
         }
+
+        [Fact]
+        public async Task Should_Create_Book_When_Description_Is_Null()
+        {
+            // Arrange
+            var dto = new CreateBookDto
+            {
+                Title = "Book",
+                Author = "Author",
+                OwnerId = Guid.NewGuid(),
+                Available = true,
+                Description = null
+            };
+
+            _bookRepoMock.Setup(r => r.AddAsync(It.IsAny<Book>()))
+                         .Returns(Task.CompletedTask);
+
+            // Act
+            var result = await _service.CreateAsync(dto);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Equal(dto.Title, result.Title);
+            Assert.Equal(dto.Author, result.Author);
+            Assert.Null(result.Description);
+            _bookRepoMock.Verify(r => r.AddAsync(It.IsAny<Book>()), Times.Once);
+        }
     }
 }
