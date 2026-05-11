@@ -157,5 +157,26 @@ namespace BookShareHub.Tests.Application.Books.BookServiceTests
 
             _bookRepoMock.Verify(r => r.AddAsync(It.IsAny<Book>()), Times.Never);
         }
+
+        [Fact]
+        public async Task Should_Throw_ArgumentOutOfRangeException_When_Author_Exceeds_MaxLength()
+        {
+            // Arrange
+            var dto = new CreateBookDto
+            {
+                Title = "Valid Title",
+                Author = new string('B', 160),
+                OwnerId = Guid.NewGuid(),
+                Available = true
+            };
+
+            _bookRepoMock.Setup(r => r.AddAsync(It.IsAny<Book>()))
+                         .Returns(Task.CompletedTask);
+
+            // Act & Assert
+            await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => _service.CreateAsync(dto));
+
+            _bookRepoMock.Verify(r => r.AddAsync(It.IsAny<Book>()), Times.Never);
+        }
     }
 }
