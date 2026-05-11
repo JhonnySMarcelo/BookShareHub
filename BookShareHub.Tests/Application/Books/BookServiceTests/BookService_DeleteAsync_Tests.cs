@@ -46,5 +46,32 @@ namespace BookShareHub.Tests.Application.Books.BookServiceTests
             Assert.Null(result);
             _bookRepoMock.Verify(r => r.DeleteAsync(It.IsAny<Guid>()), Times.Never);
         }
+
+        [Fact]
+        public async Task Should_Throw_ArgumentException_When_Id_Is_Empty()
+        {
+            // Arrange
+            var emptyId = Guid.Empty;
+
+            // Act & Assert
+            await Assert.ThrowsAsync<ArgumentException>(() => _service.DeleteAsync(emptyId));
+
+            _bookRepoMock.Verify(r => r.GetByIdAsync(It.IsAny<Guid>()), Times.Never);
+            _bookRepoMock.Verify(r => r.DeleteAsync(It.IsAny<Guid>()), Times.Never);
+        }
+
+        [Fact]
+        public async Task Should_Throw_InvalidOperationException_When_Book_Is_Not_Available()
+        {
+            // Arrange
+            var book = new Book("DDD", "Eric Evans", "Blue book", false, Guid.NewGuid());
+            _bookRepoMock.Setup(r => r.GetByIdAsync(book.Id)).ReturnsAsync(book);
+
+            // Act & Assert
+            await Assert.ThrowsAsync<InvalidOperationException>(() => _service.DeleteAsync(book.Id));
+
+            _bookRepoMock.Verify(r => r.DeleteAsync(It.IsAny<Guid>()), Times.Never);
+        }
+
     }
 }
