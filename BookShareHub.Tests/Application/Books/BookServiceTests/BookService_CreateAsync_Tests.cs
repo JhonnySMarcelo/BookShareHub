@@ -69,5 +69,28 @@ namespace BookShareHub.Tests.Application.Books.BookServiceTests
             Assert.Null(result.Description);
             _bookRepoMock.Verify(r => r.AddAsync(It.IsAny<Book>()), Times.Once);
         }
+
+        [Theory]
+        [InlineData("")]
+        [InlineData("   ")]
+        public async Task Should_Throw_ArgumentException_When_Title_Is_Invalid(string invalidTitle)
+        {
+            // Arrange
+            var dto = new CreateBookDto
+            {
+                Title = invalidTitle,
+                Author = "Author",
+                OwnerId = Guid.NewGuid(),
+                Available = true
+            };
+
+            _bookRepoMock.Setup(r => r.AddAsync(It.IsAny<Book>()))
+                         .Returns(Task.CompletedTask);
+
+            // Act & Assert
+            await Assert.ThrowsAsync<ArgumentException>(() => _service.CreateAsync(dto));
+
+            _bookRepoMock.Verify(r => r.AddAsync(It.IsAny<Book>()), Times.Never);
+        }
     }
 }
