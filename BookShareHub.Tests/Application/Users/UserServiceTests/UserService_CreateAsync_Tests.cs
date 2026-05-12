@@ -17,7 +17,6 @@ namespace BookShareHub.Tests.Application.Users.UserServiceTests
         {
             _userRepoMock = new Mock<IUserRepository>();
 
-            // Cria JwtSettings fake só para satisfazer o construtor
             var jwtSettings = Options.Create(new JwtSettings
             {
                 Secret = "TestSecret",
@@ -39,7 +38,7 @@ namespace BookShareHub.Tests.Application.Users.UserServiceTests
                 Password = "StrongPassword123"
             };
 
-            _userRepoMock.Setup(r => r.GetByEmailAsync(dto.Email))
+            _userRepoMock.Setup(r => r.FindAsync(It.IsAny<Dictionary<string, object>>()))
                          .ReturnsAsync((User?)null);
             _userRepoMock.Setup(r => r.AddAsync(It.IsAny<User>()))
                          .Returns(Task.CompletedTask);
@@ -60,13 +59,34 @@ namespace BookShareHub.Tests.Application.Users.UserServiceTests
             // Arrange
             var dto = new RegisterUserDto
             {
-                Username = "jhonny",
+                Username = "newuser",
                 Email = "jhonny@example.com",
                 Password = "StrongPassword123"
             };
 
-            var existingUser = new User(dto.Username, dto.Email, "hash");
-            _userRepoMock.Setup(r => r.GetByEmailAsync(dto.Email))
+            var existingUser = new User("otheruser", dto.Email, "hash");
+            _userRepoMock.Setup(r => r.FindAsync(It.IsAny<Dictionary<string, object>>()))
+                         .ReturnsAsync(existingUser);
+
+            // Act & Assert
+            await Assert.ThrowsAsync<InvalidOperationException>(() => _service.CreateAsync(dto));
+
+            _userRepoMock.Verify(r => r.AddAsync(It.IsAny<User>()), Times.Never);
+        }
+
+        [Fact]
+        public async Task Should_Throw_InvalidOperationException_When_Username_Already_Exists()
+        {
+            // Arrange
+            var dto = new RegisterUserDto
+            {
+                Username = "jhonny",
+                Email = "new@example.com",
+                Password = "StrongPassword123"
+            };
+
+            var existingUser = new User(dto.Username, "other@example.com", "hash");
+            _userRepoMock.Setup(r => r.FindAsync(It.IsAny<Dictionary<string, object>>()))
                          .ReturnsAsync(existingUser);
 
             // Act & Assert
@@ -88,7 +108,7 @@ namespace BookShareHub.Tests.Application.Users.UserServiceTests
                 Password = "StrongPassword123"
             };
 
-            _userRepoMock.Setup(r => r.GetByEmailAsync(dto.Email))
+            _userRepoMock.Setup(r => r.FindAsync(It.IsAny<Dictionary<string, object>>()))
                          .ReturnsAsync((User?)null);
 
             // Act & Assert
@@ -110,7 +130,7 @@ namespace BookShareHub.Tests.Application.Users.UserServiceTests
                 Password = "StrongPassword123"
             };
 
-            _userRepoMock.Setup(r => r.GetByEmailAsync(dto.Email))
+            _userRepoMock.Setup(r => r.FindAsync(It.IsAny<Dictionary<string, object>>()))
                          .ReturnsAsync((User?)null);
 
             // Act & Assert
@@ -130,18 +150,17 @@ namespace BookShareHub.Tests.Application.Users.UserServiceTests
                 Password = "StrongPassword123"
             };
 
-            _userRepoMock.Setup(r => r.GetByEmailAsync(dto.Email))
+            _userRepoMock.Setup(r => r.FindAsync(It.IsAny<Dictionary<string, object>>()))
                          .ReturnsAsync((User?)null);
             _userRepoMock.Setup(r => r.AddAsync(It.IsAny<User>()))
                          .Returns(Task.CompletedTask);
 
             // Act
             var result = await _service.CreateAsync(dto);
-            
+
             // Assert
             Assert.NotEqual("StrongPassword123", result.PasswordHash);
             Assert.False(string.IsNullOrWhiteSpace(result.PasswordHash));
         }
-
     }
 }
