@@ -1,8 +1,13 @@
 using BookShareHub.Application.Books.Services;
+using BookShareHub.Application.Configurations;
 using BookShareHub.Domain.Books.Repositories;
 using BookShareHub.Infrastructure.Books.Repositories;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
 using System.Reflection;
+using System.Text;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,6 +19,43 @@ builder.Services.AddOpenApi();
 
 var connectionString = builder.Configuration.GetConnectionString("BookShareHubDatabase")
     ?? throw new InvalidOperationException("Connection string 'BookShareHubDatabase' not found.");
+
+var jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSettings>();
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = jwtSettings.Issuer,
+        ValidAudience = jwtSettings.Audience,
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.Secret))
+    };
+
+    options.Events = new JwtBearerEvents
+    {
+        OnAuthenticationFailed = ctx =>
+        {
+            Console.WriteLine("Auth failed: " + ctx.Exception.Message);
+            return Task.CompletedTask;
+        },
+        OnTokenValidated = ctx =>
+        {
+            Console.WriteLine("Token válido para usuário: " + ctx.Principal.Identity?.Name);
+            return Task.CompletedTask;
+        }
+    };
+});
+
+builder.Services.AddAuthorization();
 
 builder.Services.AddScoped<BookService>();
 builder.Services.AddScoped<IBookRepository>(sp => new BookRepository(connectionString));
@@ -37,6 +79,22 @@ builder.Services.AddSwaggerGen(c =>
     var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
     var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
     c.IncludeXmlComments(xmlPath);
+
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = SecuritySchemeType.Http,
+        Scheme = "bearer",
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Description = "Type: Bearer {your JWT token}"
+    });
+
+    c.AddSecurityRequirement(document =>
+    new OpenApiSecurityRequirement
+    {
+        [new OpenApiSecuritySchemeReference("Bearer", document)] = []
+    });
 });
 
 
@@ -55,6 +113,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

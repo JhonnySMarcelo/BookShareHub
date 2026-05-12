@@ -1,6 +1,7 @@
 ﻿using BookShareHub.Application.Books.DTOs;
 using BookShareHub.Application.Books.Services;
 using BookShareHub.Domain.Books.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BookShareHub.BooksAPI.Controllers
@@ -8,6 +9,7 @@ namespace BookShareHub.BooksAPI.Controllers
     /// <summary>
     /// Provides endpoints to manage books in the system.
     /// </summary>
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class BooksController : ControllerBase
@@ -34,6 +36,7 @@ namespace BookShareHub.BooksAPI.Controllers
         /// or a <see cref="ValidationProblemDetails"/> with status code 400 if validation fails.
         /// </returns>
         [HttpPost]
+        [Authorize]
         [ProducesResponseType(typeof(Book), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<Book>> Create([FromBody] CreateBookDto request)
@@ -53,6 +56,7 @@ namespace BookShareHub.BooksAPI.Controllers
         /// Validation errors (e.g., empty Guid) are automatically returned as <see cref="ValidationProblemDetails"/> with status code 400.
         /// </returns>
         [HttpGet("{id:guid}")]
+        [Authorize]
         [ProducesResponseType(typeof(Book), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
@@ -73,6 +77,7 @@ namespace BookShareHub.BooksAPI.Controllers
         /// or 404 if no books exist.
         /// </returns>
         [HttpGet]
+        [Authorize]
         [ProducesResponseType(typeof(IEnumerable<Book>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<IEnumerable<Book>>> GetAll()
@@ -96,6 +101,7 @@ namespace BookShareHub.BooksAPI.Controllers
         /// or 400 if validation fails.
         /// </returns>
         [HttpPatch("{id:guid}")]
+        [Authorize]
         [ProducesResponseType(typeof(Book), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
@@ -123,6 +129,7 @@ namespace BookShareHub.BooksAPI.Controllers
         ///   if the provided <paramref name="id"/> is invalid or the book is unavailable.
         /// </returns>
         [HttpDelete("{id:guid}")]
+        [Authorize]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]

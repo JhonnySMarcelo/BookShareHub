@@ -7,6 +7,14 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.AspNet.Identity.Core" Version="2.2.4" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity" Version="2.3.9" />
+    <PackageReference Include="Microsoft.Extensions.Options" Version="9.0.13" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.16.0" />
+    <PackageReference Include="System.Security.Cryptography.Xml" Version="8.0.3" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\BookShareHub.Domain\BookShareHub.Domain.csproj" />
   </ItemGroup>
 
