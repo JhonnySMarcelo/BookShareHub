@@ -1,0 +1,21 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "ng serve with proxy",
+      "type": "shell",
+      "command": "ng",
+      "args": ["serve", "--proxy-config", "proxy.conf.json"],
+      "isBackground": true,
+      "problemMatcher": {
+        "owner": "typescript",
+        "pattern": "$tsc",
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": ".*",
+          "endsPattern": "Compiled successfully.*"
+        }
+      }
+    }
+  ]
+}
