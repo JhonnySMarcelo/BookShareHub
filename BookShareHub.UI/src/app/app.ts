@@ -1,12 +1,16 @@
-import { Component, signal } from '@angular/core';
+import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 
 @Component({
   selector: 'app-root',
+  standalone: true,
   imports: [RouterOutlet],
-  templateUrl: './app.html',
-  styleUrl: './app.scss'
+  template: `
+    <nav>
+      <a routerLink="/login">Login</a> | <a routerLink="/register">Register</a> |
+      <a routerLink="/books">Books</a>
+    </nav>
+    <router-outlet></router-outlet>
+  `,
 })
-export class App {
-  protected readonly title = signal('BookShareHub.UI');
-}
+export class App {}

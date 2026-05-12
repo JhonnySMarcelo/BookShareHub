@@ -4,21 +4,31 @@ import { Observable } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
+  private apiUrl = 'https://localhost:7007/api/Users';
+
   constructor(private http: HttpClient) {}
 
-  register(data: any): Observable<any> {
-    return this.http.post('/api/users/register', data);
+  register(data: { username: string; email: string; password: string }): Observable<any> {
+    return this.http.post(`${this.apiUrl}/register`, data);
   }
 
-  login(data: any): Observable<any> {
-    return this.http.post('/api/users/login', data);
-  }
-
-  isAuthenticated(): boolean {
-    return !!localStorage.getItem('jwt');
+  login(data: { email: string; password: string }): Observable<any> {
+    return this.http.post(`${this.apiUrl}/login`, data);
   }
 
   logout(): void {
-    localStorage.removeItem('jwt');
+    localStorage.removeItem('token');
+  }
+
+  saveToken(token: string): void {
+    localStorage.setItem('token', token);
+  }
+
+  getToken(): string | null {
+    return localStorage.getItem('token');
+  }
+
+  me(): Observable<any> {
+    return this.http.get(`${this.apiUrl}/me`);
   }
 }

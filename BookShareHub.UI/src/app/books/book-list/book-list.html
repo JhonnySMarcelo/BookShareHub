@@ -1,1 +1,22 @@
-<p>book-list works!</p>
+<h2>Books</h2>
+
+<form (ngSubmit)="createBook()">
+  <input [(ngModel)]="newBook.title" name="title" placeholder="Title" required />
+  <input [(ngModel)]="newBook.author" name="author" placeholder="Author" required />
+  <input [(ngModel)]="newBook.description" name="description" placeholder="Description" />
+  <label>
+    Available:
+    <input type="checkbox" [(ngModel)]="newBook.available" name="available" />
+  </label>
+  <button type="submit">Add Book</button>
+</form>
+
+<ul>
+  <li *ngFor="let book of books">
+    <strong>{{ book.title }}</strong> by {{ book.author }}
+    <p>{{ book.description }}</p>
+    <span *ngIf="book.available">✅ Available</span>
+    <span *ngIf="!book.available">❌ Not Available</span>
+    <button (click)="deleteBook(book.id)">Delete</button>
+  </li>
+</ul>
