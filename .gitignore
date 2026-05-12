@@ -427,3 +427,48 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
+
+# See https://docs.github.com/get-started/getting-started-with-git/ignoring-files for more about ignoring files.
+
+# Compiled output
+BookShareHub.UI/dist
+BookShareHub.UI/tmp
+BookShareHub.UI/out-tsc
+BookShareHub.UI/bazel-out
+
+# Node
+BookShareHub.UI/node_modules
+BookShareHub.UI/npm-debug.log
+BookShareHub.UI/yarn-error.log
+
+# IDEs and editors
+BookShareHub.UI/idea/
+BookShareHub.UI/.project
+BookShareHub.UI/.classpath
+BookShareHub.UI/.c9/
+BookShareHub.UI/*.launch
+BookShareHub.UI/.settings/
+BookShareHub.UI/*.sublime-workspace
+
+# Visual Studio Code
+BookShareHub.UI/.vscode/*
+BookShareHub.UI/!.vscode/settings.json
+BookShareHub.UI/!.vscode/tasks.json
+BookShareHub.UI/!.vscode/launch.json
+BookShareHub.UI/!.vscode/extensions.json
+BookShareHub.UI/!.vscode/mcp.json
+BookShareHub.UI/.history/*
+
+# Miscellaneous
+BookShareHub.UI/.angular/cache
+BookShareHub.UI/.sass-cache/
+BookShareHub.UI/connect.lock
+BookShareHub.UI/coverage
+BookShareHub.UI/libpeerconnection.log
+BookShareHub.UI/testem.log
+BookShareHub.UI/typings
+BookShareHub.UI/__screenshots__/
+
+# System files
+BookShareHub.UI/.DS_Store
+BookShareHub.UI/Thumbs.db
