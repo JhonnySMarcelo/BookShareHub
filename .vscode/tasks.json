@@ -5,7 +5,7 @@
       "label": "ng serve with proxy",
       "type": "shell",
       "command": "ng",
-      "args": ["serve", "--proxy-config", "proxy.conf.json"],
+      "args": ["serve"],
       "isBackground": true,
       "problemMatcher": {
         "owner": "typescript",

@@ -1,16 +1,20 @@
 import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
+import { Header } from './header/header';
+import { Footer } from './footer/footer';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet],
+  imports: [RouterOutlet, Header, Footer],
   template: `
-    <nav>
-      <a routerLink="/login">Login</a> | <a routerLink="/register">Register</a> |
-      <a routerLink="/books">Books</a>
-    </nav>
-    <router-outlet></router-outlet>
+    <app-header></app-header>
+
+    <main>
+      <router-outlet></router-outlet>
+    </main>
+
+    <app-footer></app-footer>
   `,
 })
 export class App {}
