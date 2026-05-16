@@ -4,7 +4,7 @@
     "secure": false,
     "changeOrigin": true
   },
-  "/api/auth": {
+  "/api/users": {
     "target": "https://localhost:7007",
     "secure": false,
     "changeOrigin": true
