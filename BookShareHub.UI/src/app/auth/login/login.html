@@ -1,5 +1,27 @@
-<form (ngSubmit)="login()" #loginForm="ngForm">
-  <input [(ngModel)]="email" name="email" type="email" required />
-  <input [(ngModel)]="password" name="password" type="password" required />
-  <button type="submit" [disabled]="loginForm.invalid">Login</button>
-</form>
+<div class="login-container">
+  <div class="login-card">
+    <h2>Welcome Back</h2>
+    <form (ngSubmit)="onSubmit()" #loginForm="ngForm">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Email</mat-label>
+        <mat-icon matPrefix>email</mat-icon>
+        <input matInput type="email" name="email" [(ngModel)]="loginData.email" required />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Password</mat-label>
+        <mat-icon matPrefix>lock</mat-icon>
+        <input matInput type="password" name="password" [(ngModel)]="loginData.password" required />
+      </mat-form-field>
+
+      <button mat-raised-button color="primary" class="login-btn" [disabled]="!loginForm.valid">
+        Login
+      </button>
+
+      <div class="login-links">
+        <a routerLink="/forgot-password">Forgot password?</a> |
+        <a routerLink="/register">Register</a>
+      </div>
+    </form>
+  </div>
+</div>

@@ -3,27 +3,41 @@ import { AuthService } from '../auth.service';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { CommonModule } from '@angular/common';
+import { MatInputModule } from '@angular/material/input';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+
 @Component({
   selector: 'app-login',
   templateUrl: './login.html',
-  imports: [[FormsModule]],
+  styleUrl: './login.scss',
+  imports: [
+    CommonModule,
+    FormsModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatButtonModule,
+    MatIconModule,
+  ],
 })
 export class Login {
-  email = '';
-  password = '';
+  loginData = { email: '', password: '' };
 
   constructor(
     private authService: AuthService,
     private router: Router,
   ) {}
 
-  login() {
-    this.authService.login({ email: this.email, password: this.password }).subscribe({
-      next: (res: any) => {
-        this.authService.saveToken(res.token);
+  onSubmit() {
+    this.authService.login(this.loginData).subscribe({
+      next: (res) => {
         this.router.navigate(['/books']);
       },
-      error: () => alert('Invalid credentials'),
+      error: (err) => {
+        alert('Invalid credentials');
+      },
     });
   }
 }
