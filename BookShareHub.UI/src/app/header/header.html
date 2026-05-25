@@ -1,12 +1,13 @@
 <header class="app-header">
   <nav>
-    <ng-container *ngIf="!authService.isLoggedIn(); else logged">
-      <a routerLink="/login">Login</a>
-      <a routerLink="/register">Register</a>
-    </ng-container>
-    <ng-template #logged>
-      <a routerLink="/books">Books</a>
-      <a (click)="logout()">Logout</a>
-    </ng-template>
+    @if (!authService.isLoggedIn()) {
+      <a routerLink="/login"> Login </a>
+
+      <a routerLink="/register"> Register </a>
+    } @else {
+      <a routerLink="/books"> Books </a>
+
+      <a (click)="logout()"> Logout </a>
+    }
   </nav>
 </header>

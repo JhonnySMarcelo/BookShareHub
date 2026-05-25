@@ -1,22 +1,78 @@
-<h2>Books</h2>
+<div class="books-page">
+  <div class="books-header">
+    <div>
+      <h1>📚 Books</h1>
+      <p class="subtitle">Manage your shared library collection.</p>
+    </div>
 
-<form (ngSubmit)="createBook()">
-  <input [(ngModel)]="newBook.title" name="title" placeholder="Title" required />
-  <input [(ngModel)]="newBook.author" name="author" placeholder="Author" required />
-  <input [(ngModel)]="newBook.description" name="description" placeholder="Description" />
-  <label>
-    Available:
-    <input type="checkbox" [(ngModel)]="newBook.available" name="available" />
-  </label>
-  <button type="submit">Add Book</button>
-</form>
+    <div class="books-count">Total books: {{ books().length }}</div>
+  </div>
 
-<ul>
-  <li *ngFor="let book of books">
-    <strong>{{ book.title }}</strong> by {{ book.author }}
-    <p>{{ book.description }}</p>
-    <span *ngIf="book.available">✅ Available</span>
-    <span *ngIf="!book.available">❌ Not Available</span>
-    <button (click)="deleteBook(book.id)">Delete</button>
-  </li>
-</ul>
+  <div class="book-form-card">
+    <form class="book-form" (ngSubmit)="createBook()">
+      <div class="form-group">
+        <label>Title</label>
+        <input [(ngModel)]="newBook.title" name="title" placeholder="Clean Code" required />
+      </div>
+
+      <div class="form-group">
+        <label>Author</label>
+        <input [(ngModel)]="newBook.author" name="author" placeholder="Robert C. Martin" required />
+      </div>
+
+      <div class="form-group full-width">
+        <label>Description</label>
+        <textarea
+          [(ngModel)]="newBook.description"
+          name="description"
+          placeholder="Book description"
+          rows="3"
+        ></textarea>
+      </div>
+
+      <div class="form-footer">
+        <label class="checkbox-wrapper">
+          <input type="checkbox" [(ngModel)]="newBook.available" name="available" />
+
+          <span>Available</span>
+        </label>
+
+        <button type="submit">Add Book</button>
+      </div>
+    </form>
+  </div>
+
+  @if (books().length > 0) {
+    <div class="books-grid">
+      @for (book of books(); track $index) {
+        <div class="book-card">
+          <div class="book-card-header">
+            <div>
+              <h2>{{ book.title }}</h2>
+              <p class="author">{{ book.author }}</p>
+            </div>
+
+            @if (book.available) {
+              <span class="status available"> ✅ Available </span>
+            } @else {
+              <span class="status unavailable"> ❌ Unavailable </span>
+            }
+          </div>
+
+          <p class="description">
+            {{ book.description || 'No description provided.' }}
+          </p>
+
+          <div class="card-actions">
+            <button class="delete-btn" (click)="deleteBook(book.id)">Delete</button>
+          </div>
+        </div>
+      }
+    </div>
+  } @else {
+    <div class="empty-state">
+      <h2>No books found</h2>
+      <p>Add your first book to start building your collection.</p>
+    </div>
+  }
+</div>

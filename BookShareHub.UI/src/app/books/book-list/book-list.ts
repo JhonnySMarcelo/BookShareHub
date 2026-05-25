@@ -1,5 +1,4 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { BookService } from '../book-service';
 import { Book } from '../Book';
@@ -7,40 +6,69 @@ import { Book } from '../Book';
 @Component({
   selector: 'app-book-list',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [FormsModule],
   templateUrl: './book-list.html',
+  styleUrl: './book-list.scss',
 })
 export class BookList implements OnInit {
-  books: Book[] = [];
-  newBook: Partial<Book> = { title: '', author: '', description: '', available: true };
+  books = signal<Book[]>([]);
+
+  newBook: Partial<Book> = {
+    title: '',
+    author: '',
+    description: '',
+    available: true,
+  };
 
   constructor(private bookService: BookService) {}
 
-  ngOnInit() {
+  ngOnInit(): void {
     this.loadBooks();
   }
 
-  loadBooks() {
+  loadBooks(): void {
     this.bookService.getAll().subscribe({
-      next: (data) => (this.books = data),
-      error: () => alert('Failed to load books'),
+      next: (data) => {
+        console.log(data);
+        this.books.set(data);
+      },
+      error: (err) => {
+        console.error(err);
+        alert('Failed to load books');
+      },
     });
   }
 
-  createBook() {
+  createBook(): void {
     this.bookService.create(this.newBook).subscribe({
       next: (book) => {
-        this.books.push(book);
-        this.newBook = { title: '', author: '', description: '', available: true };
+        this.books.update((books) => [...books, book]);
+
+        this.newBook = {
+          title: '',
+          author: '',
+          description: '',
+          available: true,
+        };
       },
-      error: () => alert('Failed to create book'),
+      error: (err) => {
+        console.error(err);
+
+        alert('Failed to create book');
+      },
     });
   }
 
-  deleteBook(id: string) {
+  deleteBook(id: string): void {
     this.bookService.delete(id).subscribe({
-      next: () => (this.books = this.books.filter((b) => b.id !== id)),
-      error: () => alert('Failed to delete book'),
+      next: () => {
+        this.books.update((books) => books.filter((b) => b.id !== id));
+      },
+      error: (err) => {
+        console.error(err);
+
+        alert('Failed to delete book');
+      },
     });
   }
 }
