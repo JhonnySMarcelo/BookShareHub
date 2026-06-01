@@ -10,11 +10,13 @@ namespace BookShareHub.Tests.Application.Books.BookServiceTests
     {
         private readonly Mock<IBookRepository> _bookRepoMock;
         private readonly BookService _service;
+        private readonly Guid _ownerId;
 
         public BookService_PatchAsync_Tests()
         {
             _bookRepoMock = new Mock<IBookRepository>();
             _service = new BookService(_bookRepoMock.Object);
+            _ownerId = Guid.NewGuid();
         }
 
         [Fact]
@@ -22,19 +24,19 @@ namespace BookShareHub.Tests.Application.Books.BookServiceTests
         {
             // Arrange
             var book = new Book("Old Title", "Author", "Desc", true, Guid.NewGuid());
-            _bookRepoMock.Setup(r => r.GetByIdAsync(book.Id)).ReturnsAsync(book);
-            _bookRepoMock.Setup(r => r.PatchAsync(book)).ReturnsAsync(book);
+            _bookRepoMock.Setup(r => r.GetByIdForOwnerAsync(book.Id, _ownerId)).ReturnsAsync(book);
+            _bookRepoMock.Setup(r => r.PatchAsync(book, _ownerId)).ReturnsAsync(book);
             var dto = new UpdateBookDto { Title = "New Title" };
 
             // Act
-            var result = await _service.PatchAsync(book.Id, dto);
+            var result = await _service.PatchAsync(book.Id, dto, _ownerId);
 
             // Assert
             Assert.Equal("New Title", result.Title);
             Assert.Equal("Author", result.Author);
             Assert.Equal("Desc", result.Description);
             Assert.True(result.Available);
-            _bookRepoMock.Verify(r => r.PatchAsync(book), Times.Once);
+            _bookRepoMock.Verify(r => r.PatchAsync(book, _ownerId), Times.Once);
         }
 
         [Fact]
@@ -42,19 +44,19 @@ namespace BookShareHub.Tests.Application.Books.BookServiceTests
         {
             // Arrange
             var book = new Book("Title", "Old Author", "Desc", true, Guid.NewGuid());
-            _bookRepoMock.Setup(r => r.GetByIdAsync(book.Id)).ReturnsAsync(book);
-            _bookRepoMock.Setup(r => r.PatchAsync(book)).ReturnsAsync(book);
+            _bookRepoMock.Setup(r => r.GetByIdForOwnerAsync(book.Id, _ownerId)).ReturnsAsync(book);
+            _bookRepoMock.Setup(r => r.PatchAsync(book, _ownerId)).ReturnsAsync(book);
             var dto = new UpdateBookDto { Author = "New Author" };
 
             // Act
-            var result = await _service.PatchAsync(book.Id, dto);
+            var result = await _service.PatchAsync(book.Id, dto, _ownerId);
 
             // Assert
             Assert.Equal("Title", result.Title);
             Assert.Equal("New Author", result.Author);
             Assert.Equal("Desc", result.Description);
             Assert.True(result.Available);
-            _bookRepoMock.Verify(r => r.PatchAsync(book), Times.Once);
+            _bookRepoMock.Verify(r => r.PatchAsync(book, _ownerId), Times.Once);
         }
 
         [Fact]
@@ -62,19 +64,19 @@ namespace BookShareHub.Tests.Application.Books.BookServiceTests
         {
             // Arrange
             var book = new Book("Title", "Author", "Old Desc", true, Guid.NewGuid());
-            _bookRepoMock.Setup(r => r.GetByIdAsync(book.Id)).ReturnsAsync(book);
-            _bookRepoMock.Setup(r => r.PatchAsync(book)).ReturnsAsync(book);
+            _bookRepoMock.Setup(r => r.GetByIdForOwnerAsync(book.Id, _ownerId)).ReturnsAsync(book);
+            _bookRepoMock.Setup(r => r.PatchAsync(book, _ownerId)).ReturnsAsync(book);
             var dto = new UpdateBookDto { Description = "New Desc" };
 
             // Act
-            var result = await _service.PatchAsync(book.Id, dto);
+            var result = await _service.PatchAsync(book.Id, dto, _ownerId);
 
             // Assert
             Assert.Equal("Title", result.Title);
             Assert.Equal("Author", result.Author);
             Assert.Equal("New Desc", result.Description);
             Assert.True(result.Available);
-            _bookRepoMock.Verify(r => r.PatchAsync(book), Times.Once);
+            _bookRepoMock.Verify(r => r.PatchAsync(book, _ownerId), Times.Once);
         }
 
         [Fact]
@@ -82,19 +84,19 @@ namespace BookShareHub.Tests.Application.Books.BookServiceTests
         {
             // Arrange
             var book = new Book("Title", "Author", "Desc", true, Guid.NewGuid());
-            _bookRepoMock.Setup(r => r.GetByIdAsync(book.Id)).ReturnsAsync(book);
-            _bookRepoMock.Setup(r => r.PatchAsync(book)).ReturnsAsync(book);
+            _bookRepoMock.Setup(r => r.GetByIdForOwnerAsync(book.Id, _ownerId)).ReturnsAsync(book);
+            _bookRepoMock.Setup(r => r.PatchAsync(book, _ownerId)).ReturnsAsync(book);
             var dto = new UpdateBookDto { Available = false };
 
             // Act
-            var result = await _service.PatchAsync(book.Id, dto);
+            var result = await _service.PatchAsync(book.Id, dto, _ownerId);
 
             // Assert
             Assert.Equal("Title", result.Title);
             Assert.Equal("Author", result.Author);
             Assert.Equal("Desc", result.Description);
             Assert.False(result.Available);
-            _bookRepoMock.Verify(r => r.PatchAsync(book), Times.Once);
+            _bookRepoMock.Verify(r => r.PatchAsync(book, _ownerId), Times.Once);
         }
 
         [Fact]
@@ -102,15 +104,15 @@ namespace BookShareHub.Tests.Application.Books.BookServiceTests
         {
             // Arrange
             var id = Guid.NewGuid();
-            _bookRepoMock.Setup(r => r.GetByIdAsync(id)).ReturnsAsync((Book?)null);
+            _bookRepoMock.Setup(r => r.GetByIdForOwnerAsync(id, _ownerId)).ReturnsAsync((Book?)null);
             var dto = new UpdateBookDto { Title = "New Title" };
 
             // Act
-            var result = await _service.PatchAsync(id, dto);
+            var result = await _service.PatchAsync(id, dto, _ownerId);
 
             // Assert
             Assert.Null(result);
-            _bookRepoMock.Verify(r => r.PatchAsync(It.IsAny<Book>()), Times.Never);
+            _bookRepoMock.Verify(r => r.PatchAsync(It.IsAny<Book>(), _ownerId), Times.Never);
         }
 
         [Fact]
@@ -121,10 +123,10 @@ namespace BookShareHub.Tests.Application.Books.BookServiceTests
             var dto = new UpdateBookDto { Title = "New Title" };
 
             // Act & Assert
-            await Assert.ThrowsAsync<ArgumentException>(() => _service.PatchAsync(emptyId, dto));
+            await Assert.ThrowsAsync<ArgumentException>(() => _service.PatchAsync(emptyId, dto, _ownerId));
 
-            _bookRepoMock.Verify(r => r.GetByIdAsync(It.IsAny<Guid>()), Times.Never);
-            _bookRepoMock.Verify(r => r.PatchAsync(It.IsAny<Book>()), Times.Never);
+            _bookRepoMock.Verify(r => r.GetByIdForOwnerAsync(It.IsAny<Guid>(), _ownerId), Times.Never);
+            _bookRepoMock.Verify(r => r.PatchAsync(It.IsAny<Book>(), _ownerId), Times.Never);
         }
 
         [Fact]
@@ -134,10 +136,10 @@ namespace BookShareHub.Tests.Application.Books.BookServiceTests
             var id = Guid.NewGuid();
 
             // Act & Assert
-            await Assert.ThrowsAsync<ArgumentNullException>(() => _service.PatchAsync(id, null));
+            await Assert.ThrowsAsync<ArgumentNullException>(() => _service.PatchAsync(id, null, _ownerId));
 
-            _bookRepoMock.Verify(r => r.GetByIdAsync(It.IsAny<Guid>()), Times.Never);
-            _bookRepoMock.Verify(r => r.PatchAsync(It.IsAny<Book>()), Times.Never);
+            _bookRepoMock.Verify(r => r.GetByIdForOwnerAsync(It.IsAny<Guid>(), _ownerId), Times.Never);
+            _bookRepoMock.Verify(r => r.PatchAsync(It.IsAny<Book>(), _ownerId), Times.Never);
         }
 
         [Theory]
@@ -147,13 +149,13 @@ namespace BookShareHub.Tests.Application.Books.BookServiceTests
         {
             // Arrange
             var book = new Book("Old Title", "Author", "Desc", true, Guid.NewGuid());
-            _bookRepoMock.Setup(r => r.GetByIdAsync(book.Id)).ReturnsAsync(book);
+            _bookRepoMock.Setup(r => r.GetByIdForOwnerAsync(book.Id, _ownerId)).ReturnsAsync(book);
             var dto = new UpdateBookDto { Title = invalidTitle };
 
             // Act & Assert
-            await Assert.ThrowsAsync<ArgumentException>(() => _service.PatchAsync(book.Id, dto));
+            await Assert.ThrowsAsync<ArgumentException>(() => _service.PatchAsync(book.Id, dto, _ownerId));
 
-            _bookRepoMock.Verify(r => r.PatchAsync(It.IsAny<Book>()), Times.Never);
+            _bookRepoMock.Verify(r => r.PatchAsync(It.IsAny<Book>(), _ownerId), Times.Never);
         }
 
         [Theory]
@@ -163,13 +165,13 @@ namespace BookShareHub.Tests.Application.Books.BookServiceTests
         {
             // Arrange
             var book = new Book("Title", "Old Author", "Desc", true, Guid.NewGuid());
-            _bookRepoMock.Setup(r => r.GetByIdAsync(book.Id)).ReturnsAsync(book);
+            _bookRepoMock.Setup(r => r.GetByIdForOwnerAsync(book.Id, _ownerId)).ReturnsAsync(book);
             var dto = new UpdateBookDto { Author = invalidAuthor };
 
             // Act & Assert
-            await Assert.ThrowsAsync<ArgumentException>(() => _service.PatchAsync(book.Id, dto));
+            await Assert.ThrowsAsync<ArgumentException>(() => _service.PatchAsync(book.Id, dto, _ownerId));
 
-            _bookRepoMock.Verify(r => r.PatchAsync(It.IsAny<Book>()), Times.Never);
+            _bookRepoMock.Verify(r => r.PatchAsync(It.IsAny<Book>(), _ownerId), Times.Never);
         }
 
         [Fact]
@@ -177,13 +179,13 @@ namespace BookShareHub.Tests.Application.Books.BookServiceTests
         {
             // Arrange
             var book = new Book("Valid Title", "Author", "Desc", true, Guid.NewGuid());
-            _bookRepoMock.Setup(r => r.GetByIdAsync(book.Id)).ReturnsAsync(book);
+            _bookRepoMock.Setup(r => r.GetByIdForOwnerAsync(book.Id, _ownerId)).ReturnsAsync(book);
             var dto = new UpdateBookDto { Title = new string('A', 260) };
 
             // Act & Assert
-            await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => _service.PatchAsync(book.Id, dto));
+            await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => _service.PatchAsync(book.Id, dto, _ownerId));
 
-            _bookRepoMock.Verify(r => r.PatchAsync(It.IsAny<Book>()), Times.Never);
+            _bookRepoMock.Verify(r => r.PatchAsync(It.IsAny<Book>(), _ownerId), Times.Never);
         }
 
         [Fact]
@@ -191,13 +193,13 @@ namespace BookShareHub.Tests.Application.Books.BookServiceTests
         {
             // Arrange
             var book = new Book("Valid Title", "Valid Author", "Desc", true, Guid.NewGuid());
-            _bookRepoMock.Setup(r => r.GetByIdAsync(book.Id)).ReturnsAsync(book);
+            _bookRepoMock.Setup(r => r.GetByIdForOwnerAsync(book.Id, _ownerId)).ReturnsAsync(book);
             var dto = new UpdateBookDto { Author = new string('B', 160) };
 
             // Act & Assert
-            await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => _service.PatchAsync(book.Id, dto));
+            await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => _service.PatchAsync(book.Id, dto, _ownerId));
 
-            _bookRepoMock.Verify(r => r.PatchAsync(It.IsAny<Book>()), Times.Never);
+            _bookRepoMock.Verify(r => r.PatchAsync(It.IsAny<Book>(), _ownerId), Times.Never);
         }
 
         [Fact]
@@ -205,13 +207,13 @@ namespace BookShareHub.Tests.Application.Books.BookServiceTests
         {
             // Arrange
             var book = new Book("Valid Title", "Valid Author", "Valid Desc", true, Guid.NewGuid());
-            _bookRepoMock.Setup(r => r.GetByIdAsync(book.Id)).ReturnsAsync(book);
+            _bookRepoMock.Setup(r => r.GetByIdForOwnerAsync(book.Id, _ownerId)).ReturnsAsync(book);
             var dto = new UpdateBookDto { Description = new string('C', 4001) };
 
             // Act & Assert
-            await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => _service.PatchAsync(book.Id, dto));
+            await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => _service.PatchAsync(book.Id, dto, _ownerId));
 
-            _bookRepoMock.Verify(r => r.PatchAsync(It.IsAny<Book>()), Times.Never);
+            _bookRepoMock.Verify(r => r.PatchAsync(It.IsAny<Book>(), _ownerId), Times.Never);
         }
 
         [Fact]
@@ -219,19 +221,19 @@ namespace BookShareHub.Tests.Application.Books.BookServiceTests
         {
             // Arrange
             var book = new Book("Title", "Author", "Desc", true, Guid.NewGuid());
-            _bookRepoMock.Setup(r => r.GetByIdAsync(book.Id)).ReturnsAsync(book);
-            _bookRepoMock.Setup(r => r.PatchAsync(book)).ReturnsAsync(book);
+            _bookRepoMock.Setup(r => r.GetByIdForOwnerAsync(book.Id, _ownerId)).ReturnsAsync(book);
+            _bookRepoMock.Setup(r => r.PatchAsync(book, _ownerId)).ReturnsAsync(book);
             var dto = new UpdateBookDto();
 
             // Act
-            var result = await _service.PatchAsync(book.Id, dto);
+            var result = await _service.PatchAsync(book.Id, dto, _ownerId);
 
             // Assert
             Assert.Equal("Title", result.Title);
             Assert.Equal("Author", result.Author);
             Assert.Equal("Desc", result.Description);
             Assert.True(result.Available);
-            _bookRepoMock.Verify(r => r.PatchAsync(book), Times.Once);
+            _bookRepoMock.Verify(r => r.PatchAsync(book, _ownerId), Times.Once);
         }
 
         [Fact]
@@ -239,19 +241,19 @@ namespace BookShareHub.Tests.Application.Books.BookServiceTests
         {
             // Arrange
             var book = new Book("Title", "Author", "Desc", true, Guid.NewGuid());
-            _bookRepoMock.Setup(r => r.GetByIdAsync(book.Id)).ReturnsAsync(book);
-            _bookRepoMock.Setup(r => r.PatchAsync(book)).ReturnsAsync(book);
+            _bookRepoMock.Setup(r => r.GetByIdForOwnerAsync(book.Id, _ownerId)).ReturnsAsync(book);
+            _bookRepoMock.Setup(r => r.PatchAsync(book, _ownerId)).ReturnsAsync(book);
             var dto = new UpdateBookDto { Title = null, Author = null };
 
             // Act
-            var result = await _service.PatchAsync(book.Id, dto);
+            var result = await _service.PatchAsync(book.Id, dto, _ownerId);
 
             // Assert
             Assert.Equal("Title", result.Title);
             Assert.Equal("Author", result.Author);
             Assert.Equal("Desc", result.Description);
             Assert.True(result.Available);
-            _bookRepoMock.Verify(r => r.PatchAsync(book), Times.Once);
+            _bookRepoMock.Verify(r => r.PatchAsync(book, _ownerId), Times.Once);
         }
 
         [Fact]
@@ -259,16 +261,16 @@ namespace BookShareHub.Tests.Application.Books.BookServiceTests
         {
             // Arrange
             var book = new Book("Title", "Author", "Old Desc", true, Guid.NewGuid());
-            _bookRepoMock.Setup(r => r.GetByIdAsync(book.Id)).ReturnsAsync(book);
-            _bookRepoMock.Setup(r => r.PatchAsync(book)).ReturnsAsync(book);
+            _bookRepoMock.Setup(r => r.GetByIdForOwnerAsync(book.Id, _ownerId)).ReturnsAsync(book);
+            _bookRepoMock.Setup(r => r.PatchAsync(book, _ownerId)).ReturnsAsync(book);
             var dto = new UpdateBookDto { Description = "" };
 
             // Act
-            var result = await _service.PatchAsync(book.Id, dto);
+            var result = await _service.PatchAsync(book.Id, dto, _ownerId);
 
             // Assert
             Assert.Equal("", result.Description);
-            _bookRepoMock.Verify(r => r.PatchAsync(book), Times.Once);
+            _bookRepoMock.Verify(r => r.PatchAsync(book, _ownerId), Times.Once);
         }
 
     }

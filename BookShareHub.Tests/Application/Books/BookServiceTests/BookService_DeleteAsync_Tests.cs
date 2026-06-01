@@ -9,11 +9,13 @@ namespace BookShareHub.Tests.Application.Books.BookServiceTests
     {
         private readonly Mock<IBookRepository> _bookRepoMock;
         private readonly BookService _service;
+        private readonly Guid _ownerId;
 
         public BookService_DeleteAsync_Tests()
         {
             _bookRepoMock = new Mock<IBookRepository>();
             _service = new BookService(_bookRepoMock.Object);
+            _ownerId = Guid.NewGuid();
         }
 
         [Fact]
@@ -21,15 +23,15 @@ namespace BookShareHub.Tests.Application.Books.BookServiceTests
         {
             // Arrange
             var book = new Book("Clean Code", "Robert Martin", "Classic", true, Guid.NewGuid());
-            _bookRepoMock.Setup(r => r.GetByIdAsync(book.Id)).ReturnsAsync(book);
-            _bookRepoMock.Setup(r => r.DeleteAsync(book.Id)).ReturnsAsync(true);
+            _bookRepoMock.Setup(r => r.GetByIdForOwnerAsync(book.Id, _ownerId)).ReturnsAsync(book);
+            _bookRepoMock.Setup(r => r.DeleteAsync(book.Id, _ownerId)).ReturnsAsync(true);
 
             // Act
-            var result = await _service.DeleteAsync(book.Id);
+            var result = await _service.DeleteAsync(book.Id, _ownerId);
 
             // Assert
             Assert.True(result);
-            _bookRepoMock.Verify(r => r.DeleteAsync(book.Id), Times.Once);
+            _bookRepoMock.Verify(r => r.DeleteAsync(book.Id, _ownerId), Times.Once);
         }
 
         [Fact]
@@ -37,14 +39,14 @@ namespace BookShareHub.Tests.Application.Books.BookServiceTests
         {
             // Arrange
             var id = Guid.NewGuid();
-            _bookRepoMock.Setup(r => r.GetByIdAsync(id)).ReturnsAsync((Book?)null);
+            _bookRepoMock.Setup(r => r.GetByIdForOwnerAsync(id, _ownerId)).ReturnsAsync((Book?)null);
 
             // Act
-            var result = await _service.DeleteAsync(id);
+            var result = await _service.DeleteAsync(id, _ownerId);
 
             // Assert
             Assert.Null(result);
-            _bookRepoMock.Verify(r => r.DeleteAsync(It.IsAny<Guid>()), Times.Never);
+            _bookRepoMock.Verify(r => r.DeleteAsync(It.IsAny<Guid>(), _ownerId), Times.Never);
         }
 
         [Fact]
@@ -54,10 +56,10 @@ namespace BookShareHub.Tests.Application.Books.BookServiceTests
             var emptyId = Guid.Empty;
 
             // Act & Assert
-            await Assert.ThrowsAsync<ArgumentException>(() => _service.DeleteAsync(emptyId));
+            await Assert.ThrowsAsync<ArgumentException>(() => _service.DeleteAsync(emptyId, _ownerId));
 
-            _bookRepoMock.Verify(r => r.GetByIdAsync(It.IsAny<Guid>()), Times.Never);
-            _bookRepoMock.Verify(r => r.DeleteAsync(It.IsAny<Guid>()), Times.Never);
+            _bookRepoMock.Verify(r => r.GetByIdForOwnerAsync(It.IsAny<Guid>(), _ownerId), Times.Never);
+            _bookRepoMock.Verify(r => r.DeleteAsync(It.IsAny<Guid>(), _ownerId), Times.Never);
         }
 
         [Fact]
@@ -65,12 +67,12 @@ namespace BookShareHub.Tests.Application.Books.BookServiceTests
         {
             // Arrange
             var book = new Book("DDD", "Eric Evans", "Blue book", false, Guid.NewGuid());
-            _bookRepoMock.Setup(r => r.GetByIdAsync(book.Id)).ReturnsAsync(book);
+            _bookRepoMock.Setup(r => r.GetByIdForOwnerAsync(book.Id, _ownerId)).ReturnsAsync(book);
 
             // Act & Assert
-            await Assert.ThrowsAsync<InvalidOperationException>(() => _service.DeleteAsync(book.Id));
+            await Assert.ThrowsAsync<InvalidOperationException>(() => _service.DeleteAsync(book.Id, _ownerId));
 
-            _bookRepoMock.Verify(r => r.DeleteAsync(It.IsAny<Guid>()), Times.Never);
+            _bookRepoMock.Verify(r => r.DeleteAsync(It.IsAny<Guid>(), _ownerId), Times.Never);
         }
     }
 }

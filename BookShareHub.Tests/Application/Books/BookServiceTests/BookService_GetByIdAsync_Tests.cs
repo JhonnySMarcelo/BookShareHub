@@ -9,11 +9,13 @@ namespace BookShareHub.Tests.Application.Books.BookServiceTests
     {
         private readonly Mock<IBookRepository> _bookRepoMock;
         private readonly BookService _service;
+        private readonly Guid _ownerId;
 
         public BookService_GetByIdAsync_Tests()
         {
             _bookRepoMock = new Mock<IBookRepository>();
             _service = new BookService(_bookRepoMock.Object);
+            _ownerId = Guid.NewGuid();
         }
 
         [Fact]
@@ -28,17 +30,17 @@ namespace BookShareHub.Tests.Application.Books.BookServiceTests
                 description: "Building upon the success of..."
             );
 
-            _bookRepoMock.Setup(r => r.GetByIdAsync(book.Id))
+            _bookRepoMock.Setup(r => r.GetByIdForOwnerAsync(book.Id, _ownerId))
                          .ReturnsAsync(book);
 
             // Act
-            var result = await _service.GetByIdAsync(book.Id);
+            var result = await _service.GetByIdAsync(book.Id, _ownerId);
 
             // Assert
             Assert.NotNull(result);
             Assert.Equal(book.Title, result.Title);
             Assert.Equal(book.Author, result.Author);
-            _bookRepoMock.Verify(r => r.GetByIdAsync(book.Id), Times.Once);
+            _bookRepoMock.Verify(r => r.GetByIdForOwnerAsync(book.Id, _ownerId), Times.Once);
         }
 
         [Fact]
@@ -48,10 +50,10 @@ namespace BookShareHub.Tests.Application.Books.BookServiceTests
             var emptyId = Guid.Empty;
 
             // Act & Assert
-            await Assert.ThrowsAsync<ArgumentException>(() => _service.GetByIdAsync(emptyId));
+            await Assert.ThrowsAsync<ArgumentException>(() => _service.GetByIdAsync(emptyId, _ownerId));
 
             // Assert
-            _bookRepoMock.Verify(r => r.GetByIdAsync(It.IsAny<Guid>()), Times.Never);
+            _bookRepoMock.Verify(r => r.GetByIdForOwnerAsync(It.IsAny<Guid>(), _ownerId), Times.Never);
         }
 
         [Fact]
@@ -59,15 +61,15 @@ namespace BookShareHub.Tests.Application.Books.BookServiceTests
         {
             // Arrange
             var id = Guid.NewGuid();
-            _bookRepoMock.Setup(r => r.GetByIdAsync(id))
+            _bookRepoMock.Setup(r => r.GetByIdForOwnerAsync(id, _ownerId))
                          .ReturnsAsync((Book?)null);
 
             // Act
-            var result = await _service.GetByIdAsync(id);
+            var result = await _service.GetByIdAsync(id, _ownerId);
 
             // Assert
             Assert.Null(result);
-            _bookRepoMock.Verify(r => r.GetByIdAsync(id), Times.Once);
+            _bookRepoMock.Verify(r => r.GetByIdForOwnerAsync(id, _ownerId), Times.Once);
         }
 
         [Fact]
@@ -84,16 +86,16 @@ namespace BookShareHub.Tests.Application.Books.BookServiceTests
             );
             typeof(Book).GetProperty(nameof(Book.BorrowerId))?.SetValue(book, borrowerId);
 
-            _bookRepoMock.Setup(r => r.GetByIdAsync(book.Id))
+            _bookRepoMock.Setup(r => r.GetByIdForOwnerAsync(book.Id, _ownerId))
                          .ReturnsAsync(book);
 
             // Act
-            var result = await _service.GetByIdAsync(book.Id);
+            var result = await _service.GetByIdAsync(book.Id, _ownerId);
 
             // Assert
             Assert.NotNull(result);
             Assert.Equal(borrowerId, result.BorrowerId);
-            _bookRepoMock.Verify(r => r.GetByIdAsync(book.Id), Times.Once);
+            _bookRepoMock.Verify(r => r.GetByIdForOwnerAsync(book.Id, _ownerId), Times.Once);
         }
 
         [Fact]
@@ -109,16 +111,16 @@ namespace BookShareHub.Tests.Application.Books.BookServiceTests
             );
             typeof(Book).GetProperty(nameof(Book.BorrowerId))?.SetValue(book, null);
 
-            _bookRepoMock.Setup(r => r.GetByIdAsync(book.Id))
+            _bookRepoMock.Setup(r => r.GetByIdForOwnerAsync(book.Id, _ownerId))
                          .ReturnsAsync(book);
 
             // Act
-            var result = await _service.GetByIdAsync(book.Id);
+            var result = await _service.GetByIdAsync(book.Id, _ownerId);
 
             // Assert
             Assert.NotNull(result);
             Assert.Null(result.BorrowerId);
-            _bookRepoMock.Verify(r => r.GetByIdAsync(book.Id), Times.Once);
+            _bookRepoMock.Verify(r => r.GetByIdForOwnerAsync(book.Id, _ownerId), Times.Once);
         }
     }
 }

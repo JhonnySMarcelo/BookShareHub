@@ -1,7 +1,9 @@
 using BookShareHub.Application.Books.Services;
 using BookShareHub.Application.Configurations;
+using BookShareHub.Application.Users.Interfaces;
 using BookShareHub.Domain.Books.Repositories;
 using BookShareHub.Infrastructure.Books.Repositories;
+using BookShareHub.Infrastructure.Users.Identity;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
@@ -12,10 +14,13 @@ using System.Text;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-
 builder.Services.AddControllers();
+
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
+
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<ICurrentUser, CurrentUser>();
 
 var connectionString = builder.Configuration.GetConnectionString("BookShareHubDatabase")
     ?? throw new InvalidOperationException("Connection string 'BookShareHubDatabase' not found.");

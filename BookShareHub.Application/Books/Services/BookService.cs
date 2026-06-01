@@ -28,12 +28,12 @@ namespace BookShareHub.Application.Books.Services
             return book;
         }      
 
-        public async Task<Book?> GetByIdAsync(Guid id)
+        public async Task<Book?> GetByIdAsync(Guid id, Guid userId)
         {
             if (id == Guid.Empty)
                 throw new ArgumentException("Id cannot be empty.", nameof(id));
 
-            return await _bookRepository.GetByIdAsync(id);
+            return await _bookRepository.GetByIdForOwnerAsync(id, userId);
         }
 
         public async Task<List<Book>> GetAllAsync()
@@ -43,23 +43,23 @@ namespace BookShareHub.Application.Books.Services
             return books?.ToList() ?? new List<Book>();
         }
 
-        public async Task<bool?> DeleteAsync(Guid id)
+        public async Task<bool?> DeleteAsync(Guid id, Guid userId)
         {
             if (id == Guid.Empty)
                 throw new ArgumentException("Book Id cannot be empty.", nameof(id));
 
-            var book = await _bookRepository.GetByIdAsync(id);
+            var book = await _bookRepository.GetByIdForOwnerAsync(id, userId);
             if (book == null) return null;
 
             if (!book.Available)
                 throw new InvalidOperationException("Book is currently borrowed and cannot be deleted.");
 
-            await _bookRepository.DeleteAsync(id);
+            await _bookRepository.DeleteAsync(id, userId);
 
             return true;
         }
 
-        public async Task<Book?> PatchAsync(Guid id, UpdateBookDto dto)
+        public async Task<Book?> PatchAsync(Guid id, UpdateBookDto dto, Guid userId)
         {
             if (id == Guid.Empty)
                 throw new ArgumentException("Book Id cannot be empty.", nameof(id));
@@ -67,7 +67,7 @@ namespace BookShareHub.Application.Books.Services
             if (dto == null)
                 throw new ArgumentNullException(nameof(dto));
 
-            var book = await _bookRepository.GetByIdAsync(id);
+            var book = await _bookRepository.GetByIdForOwnerAsync(id, userId);
             if (book == null)
                 return null;
 
@@ -83,7 +83,7 @@ namespace BookShareHub.Application.Books.Services
             if (dto.Available.HasValue)
                 book.UpdateAvailability(dto.Available.Value);
 
-            return await _bookRepository.PatchAsync(book);
+            return await _bookRepository.PatchAsync(book, userId);
         }
     }
 }

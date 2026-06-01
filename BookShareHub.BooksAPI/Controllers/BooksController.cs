@@ -1,5 +1,6 @@
 ﻿using BookShareHub.Application.Books.DTOs;
 using BookShareHub.Application.Books.Services;
+using BookShareHub.Application.Users.Interfaces;
 using BookShareHub.Domain.Books.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -15,14 +16,17 @@ namespace BookShareHub.BooksAPI.Controllers
     public class BooksController : ControllerBase
     {
         private readonly BookService _bookService;
+        private readonly ICurrentUser _currentUser;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="BooksController"/>.
         /// </summary>
         /// <param name="bookService">The service responsible for book operations.</param>
-        public BooksController(BookService bookService)
+        /// <param name="currentUser">Provides access to information about the currently authenticated user.</param>
+        public BooksController(BookService bookService, ICurrentUser currentUser)
         {
             _bookService = bookService;
+            _currentUser = currentUser;
         }
 
         /// <summary>
@@ -41,6 +45,8 @@ namespace BookShareHub.BooksAPI.Controllers
         [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<Book>> Create([FromBody] CreateBookDto request)
         {
+            request.OwnerId = _currentUser.UserId;
+
             var book = await _bookService.CreateAsync(request);
 
             return CreatedAtAction(nameof(GetById), new { id = book.Id }, book);
@@ -62,7 +68,7 @@ namespace BookShareHub.BooksAPI.Controllers
         [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<Book>> GetById(Guid id)
         {
-            var book = await _bookService.GetByIdAsync(id);
+            var book = await _bookService.GetByIdAsync(id, _currentUser.UserId);
 
             if (book == null) return NotFound();
 
@@ -107,7 +113,7 @@ namespace BookShareHub.BooksAPI.Controllers
         [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<Book>> Update(Guid id, [FromBody] UpdateBookDto dto)
         {
-            var updatedBook = await _bookService.PatchAsync(id, dto);
+            var updatedBook = await _bookService.PatchAsync(id, dto, _currentUser.UserId);
 
             if (updatedBook == null)
                 return NotFound();
@@ -135,7 +141,7 @@ namespace BookShareHub.BooksAPI.Controllers
         [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Delete(Guid id)
         {
-            var result = await _bookService.DeleteAsync(id);
+            var result = await _bookService.DeleteAsync(id, _currentUser.UserId);
 
             if (result == null)
                 return NotFound();

@@ -35,16 +35,17 @@ namespace BookShareHub.Infrastructure.Books.Repositories
             await command.ExecuteNonQueryAsync();
         }
 
-        public async Task<Book?> GetByIdAsync(Guid id)
+        public async Task<Book?> GetByIdForOwnerAsync(Guid id, Guid userId)
         {
             using var connection = new SqlConnection(_connectionString);
             await connection.OpenAsync();
 
             var command = new SqlCommand(
                 "SELECT Id, Title, Author, Description, Available, CreationTime, OwnerId, BorrowerId " +
-                "FROM Books WHERE Id = @Id", connection);
+                "FROM Books WHERE Id = @Id AND OwnerId = @OwnerId", connection);
 
             command.Parameters.AddWithValue("@Id", id);
+            command.Parameters.AddWithValue("@OwnerId", userId);
 
             using var reader = await command.ExecuteReaderAsync();
 
@@ -108,7 +109,7 @@ namespace BookShareHub.Infrastructure.Books.Repositories
             return books;
         }
 
-        public async Task<Book?> PatchAsync(Book book)
+        public async Task<Book?> PatchAsync(Book book, Guid userId)
         {
             using var connection = new SqlConnection(_connectionString);
             await connection.OpenAsync();
@@ -143,24 +144,26 @@ namespace BookShareHub.Infrastructure.Books.Repositories
             command.Parameters.AddWithValue("@BorrowerId", book.BorrowerId == null ? DBNull.Value : book.BorrowerId);
 
             if (!updates.Any())
-                return await GetByIdAsync(book.Id);
+                return await GetByIdForOwnerAsync(book.Id, userId);
 
-            command.CommandText = $"UPDATE Books SET {string.Join(", ", updates)} WHERE Id = @Id";
+            command.CommandText = $"UPDATE Books SET {string.Join(", ", updates)} WHERE Id = @Id AND OwnerId = @OwnerId";
             command.Parameters.AddWithValue("@Id", book.Id);
+            command.Parameters.AddWithValue("@OwnerId", userId);
 
             var rowsAffected = await command.ExecuteNonQueryAsync();
             if (rowsAffected == 0) return null;
 
-            return await GetByIdAsync(book.Id);
+            return await GetByIdForOwnerAsync(book.Id, userId);
         }
 
-        public async Task<bool> DeleteAsync(Guid id)
+        public async Task<bool> DeleteAsync(Guid id, Guid userId)
         {
             using var connection = new SqlConnection(_connectionString);
             await connection.OpenAsync();
 
-            var command = new SqlCommand("DELETE FROM Books WHERE Id = @Id", connection);
+            var command = new SqlCommand("DELETE FROM Books WHERE Id = @Id AND OwnerId = @OwnerId", connection);
             command.Parameters.AddWithValue("@Id", id);
+            command.Parameters.AddWithValue("@OwnerId", userId);
 
             var rowsAffected = await command.ExecuteNonQueryAsync();
             return rowsAffected > 0;

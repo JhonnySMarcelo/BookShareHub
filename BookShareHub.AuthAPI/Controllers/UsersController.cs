@@ -1,9 +1,9 @@
 ﻿using BookShareHub.Application.Users.DTOs;
+using BookShareHub.Application.Users.Interfaces;
 using BookShareHub.Application.Users.Services;
 using BookShareHub.Domain.Users.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 
 namespace BookShareHub.UsersAPI.Controllers
 {
@@ -15,14 +15,17 @@ namespace BookShareHub.UsersAPI.Controllers
     public class UsersController : ControllerBase
     {
         private readonly UserService _userService;
+        private readonly ICurrentUser _currentUser;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="UsersController"/>.
         /// </summary>
         /// <param name="userService">The service responsible for user operations.</param>
-        public UsersController(UserService userService)
+        /// <param name="currentUser">Provides access to information about the currently authenticated user.</param>
+        public UsersController(UserService userService, ICurrentUser currentUser)
         {
             _userService = userService;
+            _currentUser = currentUser;
         }
 
         /// <summary>
@@ -62,7 +65,9 @@ namespace BookShareHub.UsersAPI.Controllers
         public async Task<IActionResult> Login([FromBody] LoginUserDto dto)
         {
             var token = await _userService.LoginAsync(dto);
+
             if (token == null) return Unauthorized();
+
             return Ok(new { Token = token });
         }
 
@@ -94,12 +99,7 @@ namespace BookShareHub.UsersAPI.Controllers
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<ActionResult<User>> Me()
         {
-            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (string.IsNullOrEmpty(userIdClaim)) return Unauthorized();
-
-            if (!Guid.TryParse(userIdClaim, out var userId)) return Unauthorized();
-
-            var user = await _userService.GetByIdAsync(userId);
+            var user = await _userService.GetByIdAsync(_currentUser.UserId);
             if (user == null) return Unauthorized();
 
             return Ok(user);
@@ -108,7 +108,6 @@ namespace BookShareHub.UsersAPI.Controllers
         /// <summary>
         /// Partially updates the authenticated user's own profile.
         /// </summary>
-        /// <param name="id">The unique identifier of the user.</param>
         /// <param name="dto">The fields to update (only non-null values will be applied).</param>
         /// <returns>
         /// Returns:
@@ -118,23 +117,16 @@ namespace BookShareHub.UsersAPI.Controllers
         /// - <see cref="StatusCodes.Status401Unauthorized"/> if the request has no valid JWT.
         /// - <see cref="StatusCodes.Status403Forbidden"/> if the authenticated user tries to update another user's profile.
         /// </returns>
-        [HttpPatch("{id:guid}")]
+        [HttpPatch("me")]
         [Authorize]
         [ProducesResponseType(typeof(User), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        public async Task<ActionResult<User>> Update(Guid id, [FromBody] UpdateUserDto dto)
+        public async Task<ActionResult<User>> Update([FromBody] UpdateUserDto dto)
         {
-            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (string.IsNullOrEmpty(userIdClaim)) return Unauthorized();
-
-            if (!Guid.TryParse(userIdClaim, out var authenticatedUserId)) return Unauthorized();
-
-            if (authenticatedUserId != id) return Forbid();
-
-            var updatedUser = await _userService.PatchAsync(id, dto);
+            var updatedUser = await _userService.PatchAsync(_currentUser.UserId, dto);
             if (updatedUser == null) return NotFound();
 
             return Ok(updatedUser);
@@ -143,26 +135,22 @@ namespace BookShareHub.UsersAPI.Controllers
 
 
         /// <summary>
-        /// Deletes a user by its unique identifier.
+        /// Deletes the currently authenticated user.
         /// </summary>
-        /// <param name="id">
-        /// The unique identifier of the user to be deleted.
-        /// </param>
         /// <returns>
         /// Returns:
         /// - <see cref="StatusCodes.Status204NoContent"/> if the user was successfully deleted.
         /// - <see cref="StatusCodes.Status404NotFound"/> if the user does not exist.
         /// - <see cref="ValidationProblemDetails"/> with <see cref="StatusCodes.Status400BadRequest"/> 
-        ///   if the provided <paramref name="id"/> is invalid.
         /// </returns>
-        [HttpDelete("{id:guid}")]
+        [HttpDelete("me")]
         [Authorize]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> Delete(Guid id)
+        public async Task<IActionResult> Delete()
         {
-            var result = await _userService.DeleteAsync(id);
+            var result = await _userService.DeleteAsync(_currentUser.UserId);
 
             if (result == null)
                 return NotFound();
