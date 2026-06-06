@@ -68,6 +68,10 @@ export class BookList implements OnInit {
   }
 
   startEdit(book: Book): void {
+    if (!book.isOwner) {
+      return;
+    }
+
     this.editingBookId.set(book.id);
 
     this.editBook = {

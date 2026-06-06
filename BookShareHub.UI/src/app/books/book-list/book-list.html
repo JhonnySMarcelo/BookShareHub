@@ -22,6 +22,7 @@
 
       <div class="form-group full-width">
         <label>Description</label>
+
         <textarea
           [(ngModel)]="newBook.description"
           name="description"
@@ -45,7 +46,7 @@
   @if (books().length > 0) {
     <div class="books-grid">
       @for (book of books(); track book.id) {
-        <div class="book-card">
+        <div class="book-card" [class.owned]="book.isOwner">
           @if (editingBookId() === book.id) {
             <form class="edit-form" (ngSubmit)="updateBook(book.id)">
               <div class="edit-header">
@@ -82,9 +83,14 @@
               </div>
             </form>
           } @else {
+            @if (book.isOwner) {
+              <div class="owner-badge">⭐ Owned by You</div>
+            }
+
             <div class="book-card-header">
               <div>
                 <h2>{{ book.title }}</h2>
+
                 <p class="author">{{ book.author }}</p>
               </div>
 
@@ -100,9 +106,11 @@
             </p>
 
             <div class="card-actions">
-              <button class="edit-btn" (click)="startEdit(book)">Edit</button>
+              @if (book.isOwner) {
+                <button class="edit-btn" (click)="startEdit(book)">Edit</button>
 
-              <button class="delete-btn" (click)="deleteBook(book.id)">Delete</button>
+                <button class="delete-btn" (click)="deleteBook(book.id)">Delete</button>
+              }
             </div>
           }
         </div>
