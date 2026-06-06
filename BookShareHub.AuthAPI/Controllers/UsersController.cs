@@ -99,7 +99,7 @@ namespace BookShareHub.UsersAPI.Controllers
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<ActionResult<User>> Me()
         {
-            var user = await _userService.GetByIdAsync(_currentUser.UserId);
+            var user = await _userService.GetByIdAsync(_currentUser.UserId!.Value);
             if (user == null) return Unauthorized();
 
             return Ok(user);
@@ -126,7 +126,7 @@ namespace BookShareHub.UsersAPI.Controllers
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         public async Task<ActionResult<User>> Update([FromBody] UpdateUserDto dto)
         {
-            var updatedUser = await _userService.PatchAsync(_currentUser.UserId, dto);
+            var updatedUser = await _userService.PatchAsync(_currentUser.UserId!.Value, dto);
             if (updatedUser == null) return NotFound();
 
             return Ok(updatedUser);
@@ -150,7 +150,7 @@ namespace BookShareHub.UsersAPI.Controllers
         [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Delete()
         {
-            var result = await _userService.DeleteAsync(_currentUser.UserId);
+            var result = await _userService.DeleteAsync(_currentUser.UserId!.Value);
 
             if (result == null)
                 return NotFound();

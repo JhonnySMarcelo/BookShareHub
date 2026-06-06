@@ -155,6 +155,7 @@ namespace BookShareHub.Infrastructure.Books.Repositories
 
             return await GetByIdForOwnerAsync(book.Id, userId);
         }
+
         public async Task<bool> DeleteAsync(Guid id, Guid userId)
         {
             using var connection = new SqlConnection(_connectionString);

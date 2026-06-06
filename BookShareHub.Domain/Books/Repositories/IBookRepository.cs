@@ -1,7 +1,4 @@
 ﻿using BookShareHub.Domain.Books.Entities;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace BookShareHub.Domain.Books.Repositories
 {

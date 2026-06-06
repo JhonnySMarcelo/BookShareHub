@@ -13,7 +13,7 @@ namespace BookShareHub.Infrastructure.Users.Identity
             _httpContextAccessor = httpContextAccessor;
         }
 
-        public Guid UserId
+        public Guid? UserId
         {
             get
             {
@@ -22,10 +22,9 @@ namespace BookShareHub.Infrastructure.Users.Identity
                     .User
                     .FindFirstValue(ClaimTypes.NameIdentifier);
 
-                if (string.IsNullOrEmpty(claim))
-                    throw new UnauthorizedAccessException();
-
-                return Guid.Parse(claim);
+                return Guid.TryParse(claim, out var id)
+                    ? id
+                    : null;
             }
         }
     }

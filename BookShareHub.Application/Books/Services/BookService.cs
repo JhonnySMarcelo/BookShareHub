@@ -1,9 +1,6 @@
 ﻿using BookShareHub.Application.Books.DTOs;
 using BookShareHub.Domain.Books.Entities;
 using BookShareHub.Domain.Books.Repositories;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace BookShareHub.Application.Books.Services
 {
@@ -36,11 +33,23 @@ namespace BookShareHub.Application.Books.Services
             return await _bookRepository.GetByIdForOwnerAsync(id, userId);
         }
 
-        public async Task<List<Book>> GetAllAsync()
+        public async Task<List<GetBookDto>> GetAllAsync(Guid? currentUserId)
         {
             var books = await _bookRepository.GetAllAsync();
 
-            return books?.ToList() ?? new List<Book>();
+            return books.Select(b => new GetBookDto
+            {
+                Id = b.Id,
+                Title = b.Title,
+                Author = b.Author,
+                Description = b.Description,
+                Available = b.Available,
+                IsOwner = currentUserId.HasValue &&
+                          b.OwnerId == currentUserId.Value
+            })
+            .OrderByDescending(x => x.IsOwner)
+            .ThenBy(x => x.Title)
+            .ToList();
         }
 
         public async Task<bool?> DeleteAsync(Guid id, Guid userId)
@@ -59,7 +68,7 @@ namespace BookShareHub.Application.Books.Services
             return true;
         }
 
-        public async Task<Book?> PatchAsync(Guid id, UpdateBookDto dto, Guid userId)
+        public async Task<GetBookDto?> PatchAsync(Guid id, UpdateBookDto dto, Guid userId)
         {
             if (id == Guid.Empty)
                 throw new ArgumentException("Book Id cannot be empty.", nameof(id));
@@ -83,7 +92,19 @@ namespace BookShareHub.Application.Books.Services
             if (dto.Available.HasValue)
                 book.UpdateAvailability(dto.Available.Value);
 
-            return await _bookRepository.PatchAsync(book, userId);
+            var updatedBook = await _bookRepository.PatchAsync(book, userId);
+            if (updatedBook == null)
+                return null;
+
+            return new GetBookDto
+            {
+                Id = updatedBook.Id,
+                Title = updatedBook.Title,
+                Author = updatedBook.Author,
+                Description = updatedBook.Description,
+                Available = updatedBook.Available,
+                IsOwner = true
+            };
         }
     }
 }
