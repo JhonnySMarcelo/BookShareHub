@@ -1,13 +1,23 @@
 <header class="app-header">
-  <nav>
-    @if (!authService.isLoggedIn()) {
-      <a routerLink="/login"> Login </a>
+  <div class="header-content">
+    <div class="brand">
+      <a routerLink="/books">BookShareHub</a>
+    </div>
 
-      <a routerLink="/register"> Register </a>
-    } @else {
-      <a routerLink="/books"> Books </a>
+    <nav>
+      @for (item of navItems; track item.label) {
+        @if (item.route) {
+          <a [routerLink]="item.route">
+            {{ item.label }}
+          </a>
+        }
 
-      <a (click)="logout()"> Logout </a>
-    }
-  </nav>
+        @if (item.action) {
+          <a (click)="item.action()">
+            {{ item.label }}
+          </a>
+        }
+      }
+    </nav>
+  </div>
 </header>

@@ -9,19 +9,33 @@
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
 }
 
-.app-header nav {
+.header-content {
   max-width: 1200px;
   margin: 0 auto;
 
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
-  gap: 2rem;
 
   padding: 1rem 2rem;
 }
 
-.app-header a {
+.brand a {
+  color: white;
+  text-decoration: none;
+
+  font-size: 1.4rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+nav {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+
+nav a {
   color: white;
   text-decoration: none;
   font-weight: 600;
@@ -31,7 +45,7 @@
   transition: 0.2s ease;
 }
 
-.app-header a:hover {
+nav a:hover {
   opacity: 0.8;
   transform: translateY(-1px);
 }
