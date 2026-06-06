@@ -31,7 +31,7 @@ namespace BookShareHub.Tests.Application.Books.BookServiceTests
                          .ReturnsAsync(books);
 
             // Act
-            var result = await _service.GetAllAsync();
+            var result = await _service.GetAllAsync(null);
 
             // Assert
             Assert.NotNull(result);
@@ -47,7 +47,7 @@ namespace BookShareHub.Tests.Application.Books.BookServiceTests
                          .ReturnsAsync(new List<Book>());
 
             // Act
-            var result = await _service.GetAllAsync();
+            var result = await _service.GetAllAsync(null);
 
             // Assert
             Assert.NotNull(result);
