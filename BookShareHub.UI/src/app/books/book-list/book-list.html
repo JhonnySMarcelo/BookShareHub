@@ -44,28 +44,67 @@
 
   @if (books().length > 0) {
     <div class="books-grid">
-      @for (book of books(); track $index) {
+      @for (book of books(); track book.id) {
         <div class="book-card">
-          <div class="book-card-header">
-            <div>
-              <h2>{{ book.title }}</h2>
-              <p class="author">{{ book.author }}</p>
+          @if (editingBookId() === book.id) {
+            <form class="edit-form" (ngSubmit)="updateBook(book.id)">
+              <div class="edit-header">
+                <div class="form-group">
+                  <label>Title</label>
+                  <input [(ngModel)]="editBook.title" name="editTitle" required />
+                </div>
+
+                <label class="checkbox-wrapper">
+                  <input type="checkbox" [(ngModel)]="editBook.available" name="editAvailable" />
+                  <span>Available</span>
+                </label>
+              </div>
+
+              <div class="form-group">
+                <label>Author</label>
+                <input [(ngModel)]="editBook.author" name="editAuthor" required />
+              </div>
+
+              <div class="form-group">
+                <label>Description</label>
+
+                <textarea
+                  [(ngModel)]="editBook.description"
+                  name="editDescription"
+                  rows="3"
+                ></textarea>
+              </div>
+
+              <div class="card-actions">
+                <button type="submit">Save</button>
+
+                <button type="button" class="cancel-btn" (click)="cancelEdit()">Cancel</button>
+              </div>
+            </form>
+          } @else {
+            <div class="book-card-header">
+              <div>
+                <h2>{{ book.title }}</h2>
+                <p class="author">{{ book.author }}</p>
+              </div>
+
+              @if (book.available) {
+                <span class="status available">✅ Available</span>
+              } @else {
+                <span class="status unavailable">❌ Unavailable</span>
+              }
             </div>
 
-            @if (book.available) {
-              <span class="status available"> ✅ Available </span>
-            } @else {
-              <span class="status unavailable"> ❌ Unavailable </span>
-            }
-          </div>
+            <p class="description">
+              {{ book.description || 'No description provided.' }}
+            </p>
 
-          <p class="description">
-            {{ book.description || 'No description provided.' }}
-          </p>
+            <div class="card-actions">
+              <button class="edit-btn" (click)="startEdit(book)">Edit</button>
 
-          <div class="card-actions">
-            <button class="delete-btn" (click)="deleteBook(book.id)">Delete</button>
-          </div>
+              <button class="delete-btn" (click)="deleteBook(book.id)">Delete</button>
+            </div>
+          }
         </div>
       }
     </div>
