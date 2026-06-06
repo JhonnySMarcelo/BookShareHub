@@ -29,10 +29,6 @@ export class Header {
     if (this.authService.isLoggedIn()) {
       return [
         {
-          label: 'Books',
-          route: '/books',
-        },
-        {
           label: 'Logout',
           action: () => this.logout(),
         },
