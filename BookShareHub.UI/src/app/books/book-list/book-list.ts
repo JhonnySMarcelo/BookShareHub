@@ -13,6 +13,7 @@ import { Book } from '../Book';
 export class BookList implements OnInit {
   books = signal<Book[]>([]);
   editingBookId = signal<string | null>(null);
+  private originalBook: Book | null = null;
 
   newBook: Partial<Book> = {
     title: '',
@@ -72,6 +73,7 @@ export class BookList implements OnInit {
       return;
     }
 
+    this.originalBook = { ...book };
     this.editingBookId.set(book.id);
 
     this.editBook = {
@@ -94,7 +96,13 @@ export class BookList implements OnInit {
   }
 
   updateBook(id: string): void {
-    this.bookService.update(id, this.editBook).subscribe({
+    const patch = this.buildPatchDto();
+
+    if (Object.keys(patch).length === 0) {
+      this.cancelEdit();
+      return;
+    }
+    this.bookService.update(id, patch).subscribe({
       next: (updatedBook) => {
         this.books.update((books) => books.map((book) => (book.id === id ? updatedBook : book)));
 
@@ -106,6 +114,32 @@ export class BookList implements OnInit {
         alert('Failed to update book');
       },
     });
+  }
+
+  private buildPatchDto(): Partial<Book> {
+    if (!this.originalBook) {
+      return {};
+    }
+
+    const patch: Partial<Book> = {};
+
+    if (this.editBook.title !== this.originalBook.title) {
+      patch.title = this.editBook.title;
+    }
+
+    if (this.editBook.author !== this.originalBook.author) {
+      patch.author = this.editBook.author;
+    }
+
+    if (this.editBook.description !== this.originalBook.description) {
+      patch.description = this.editBook.description;
+    }
+
+    if (this.editBook.available !== this.originalBook.available) {
+      patch.available = this.editBook.available;
+    }
+
+    return patch;
   }
 
   deleteBook(id: string): void {

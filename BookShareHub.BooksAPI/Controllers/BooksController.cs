@@ -111,7 +111,7 @@ namespace BookShareHub.BooksAPI.Controllers
         [ProducesResponseType(typeof(Book), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<Book>> Update(Guid id, [FromBody] UpdateBookDto dto)
+        public async Task<ActionResult<Book>> Update(Guid id, [FromBody] PatchBookDto dto)
         {
             var updatedBook = await _bookService.PatchAsync(id, dto, _currentUser.UserId!.Value);
 

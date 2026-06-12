@@ -1,6 +1,6 @@
 ﻿namespace BookShareHub.Application.Books.DTOs
 {
-    public record UpdateBookDto
+    public record PatchBookDto
     {
         public string? Title { get; init; }
         public string? Author { get; init; }

@@ -68,7 +68,7 @@ namespace BookShareHub.Application.Books.Services
             return true;
         }
 
-        public async Task<GetBookDto?> PatchAsync(Guid id, UpdateBookDto dto, Guid userId)
+        public async Task<GetBookDto?> PatchAsync(Guid id, PatchBookDto dto, Guid userId)
         {
             if (id == Guid.Empty)
                 throw new ArgumentException("Book Id cannot be empty.", nameof(id));
