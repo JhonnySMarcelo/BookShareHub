@@ -9,14 +9,14 @@ using Moq;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 
-namespace BookShareHub.Tests.Application.Users.UserServiceTests
+namespace BookShareHub.Tests.Application.Auth.AuthServiceTests
 {
-    public class UserService_LoginAsync_Tests
+    public class AuthService_LoginAsync_Tests
     {
         private readonly Mock<IUserRepository> _userRepoMock;
-        private readonly UserService _service;
+        private readonly AuthService _service;
 
-        public UserService_LoginAsync_Tests()
+        public AuthService_LoginAsync_Tests()
         {
             _userRepoMock = new Mock<IUserRepository>();
 
@@ -27,7 +27,7 @@ namespace BookShareHub.Tests.Application.Users.UserServiceTests
                 Audience = "TestAudience"
             });
 
-            _service = new UserService(_userRepoMock.Object, jwtSettings);
+            _service = new AuthService(_userRepoMock.Object, jwtSettings);
         }
 
         [Fact]
