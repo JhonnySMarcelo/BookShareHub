@@ -62,6 +62,7 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddAuthorization();
 
 builder.Services.AddScoped<UserService>();
+builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<IUserRepository>(sp => new UserRepository(connectionString));
 
 builder.Services.AddEndpointsApiExplorer();

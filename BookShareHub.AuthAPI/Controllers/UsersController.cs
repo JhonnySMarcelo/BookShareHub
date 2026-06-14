@@ -26,7 +26,7 @@ namespace BookShareHub.UsersAPI.Controllers
         {
             _userService = userService;
             _currentUser = currentUser;
-        }
+        }      
 
         /// <summary>
         /// Registers a new user in the system.
@@ -46,44 +46,6 @@ namespace BookShareHub.UsersAPI.Controllers
         {
             var user = await _userService.CreateAsync(request);
             return Created($"api/users/{user.Id}", user);
-        }
-
-        /// <summary>
-        /// Authenticates a user and returns a JWT token.
-        /// </summary>
-        /// <param name="dto">
-        /// The data transfer object containing the login credentials (email and password).
-        /// </param>
-        /// <returns>
-        /// Returns a JWT token with status code 200 if authentication is successful,
-        /// or 401 if credentials are invalid.
-        /// </returns>
-        [HttpPost("login")]
-        [AllowAnonymous]
-        [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        public async Task<IActionResult> Login([FromBody] LoginUserDto dto)
-        {
-            var token = await _userService.LoginAsync(dto);
-
-            if (token == null) return Unauthorized();
-
-            return Ok(new { Token = token });
-        }
-
-        /// <summary>
-        /// Logs out the current user.
-        /// </summary>
-        /// <returns>
-        /// Returns a confirmation message with status code 200.
-        /// Note: With JWT authentication, logout is handled client-side by discarding the token.
-        /// </returns>
-        [HttpPost("logout")]
-        [Authorize]
-        [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
-        public IActionResult Logout()
-        {
-            return Ok(new { Message = "Logged out successfully. Discard your JWT token." });
         }
 
         /// <summary>
