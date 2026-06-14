@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
-import { AuthService } from '../auth.service';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { UserService } from '../user.service';
 
 @Component({
   selector: 'app-register',
@@ -14,12 +14,12 @@ export class Register {
   password = '';
 
   constructor(
-    private authService: AuthService,
+    private userService: UserService,
     private router: Router,
   ) {}
 
   register() {
-    this.authService
+    this.userService
       .register({ username: this.username, email: this.email, password: this.password })
       .subscribe({
         next: () => {
