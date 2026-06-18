@@ -1,3 +1,4 @@
+using BookShareHub.Application.Auth.Services;
 using BookShareHub.Application.Configurations;
 using BookShareHub.Application.Users.Interfaces;
 using BookShareHub.Application.Users.Services;

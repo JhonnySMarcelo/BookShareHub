@@ -9,7 +9,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 
-namespace BookShareHub.Application.Users.Services
+namespace BookShareHub.Application.Auth.Services
 {
     public class AuthService
     {

@@ -1,5 +1,5 @@
-﻿using BookShareHub.Application.Users.DTOs;
-using BookShareHub.Application.Users.Services;
+﻿using BookShareHub.Application.Auth.Services;
+using BookShareHub.Application.Users.DTOs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
