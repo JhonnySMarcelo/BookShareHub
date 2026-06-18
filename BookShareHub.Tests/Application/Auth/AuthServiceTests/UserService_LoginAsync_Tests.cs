@@ -1,6 +1,6 @@
-﻿using BookShareHub.Application.Configurations;
+﻿using BookShareHub.Application.Auth.Services;
+using BookShareHub.Application.Configurations;
 using BookShareHub.Application.Users.DTOs;
-using BookShareHub.Application.Users.Services;
 using BookShareHub.Domain.Users.Entities;
 using BookShareHub.Domain.Users.Repositories;
 using Microsoft.AspNetCore.Identity;
