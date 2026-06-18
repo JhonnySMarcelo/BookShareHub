@@ -8,6 +8,7 @@ import { CommonModule } from '@angular/common';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { getErrorMessage } from '../../core/erros/error-utils';
 
 @Component({
   selector: 'app-login',
@@ -36,7 +37,11 @@ export class Login {
         this.router.navigate(['/books']);
       },
       error: (err) => {
-        alert('Invalid credentials');
+        if (err.status === 401) {
+          alert('Invalid email or password. Please try again.');
+        } else {
+          alert(getErrorMessage(err));
+        }
       },
     });
   }

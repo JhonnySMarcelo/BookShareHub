@@ -1,7 +1,8 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { BookService } from '../book-service';
-import { Book } from '../Book';
+import { Book } from '../models/Book';
+import { getErrorMessage } from '../../core/erros/error-utils';
 
 @Component({
   selector: 'app-book-list',
@@ -42,8 +43,7 @@ export class BookList implements OnInit {
         this.books.set(data);
       },
       error: (err) => {
-        console.error(err);
-        alert('Failed to load books');
+        alert(getErrorMessage(err));
       },
     });
   }
@@ -61,9 +61,7 @@ export class BookList implements OnInit {
         };
       },
       error: (err) => {
-        console.error(err);
-
-        alert('Failed to create book');
+        alert(getErrorMessage(err));
       },
     });
   }
@@ -109,9 +107,7 @@ export class BookList implements OnInit {
         this.cancelEdit();
       },
       error: (err) => {
-        console.error(err);
-
-        alert('Failed to update book');
+        alert(getErrorMessage(err));
       },
     });
   }
@@ -148,9 +144,7 @@ export class BookList implements OnInit {
         this.books.update((books) => books.filter((b) => b.id !== id));
       },
       error: (err) => {
-        console.error(err);
-
-        alert('Failed to delete book');
+        alert(getErrorMessage(err));
       },
     });
   }

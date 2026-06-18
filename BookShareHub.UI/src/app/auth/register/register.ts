@@ -1,7 +1,8 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { UserService } from '../user.service';
+import { UserService } from '../../users/user.service';
+import { getErrorMessage } from '../../core/erros/error-utils';
 
 @Component({
   selector: 'app-register',
@@ -26,7 +27,9 @@ export class Register {
           alert('User registered successfully!');
           this.router.navigate(['/login']);
         },
-        error: () => alert('Failed to register'),
+        error: (err) => {
+          alert(getErrorMessage(err));
+        },
       });
   }
 }
