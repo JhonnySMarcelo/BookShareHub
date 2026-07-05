@@ -37,3 +37,23 @@ body {
   height: 100%;
 }
 /* You can add global styles to this file, and also import other style files */
+
+.snack-success .mdc-snackbar__surface {
+  background-color: #4caf50 !important;
+  color: #fff !important;
+}
+
+.snack-error .mdc-snackbar__surface {
+  background-color: #f44336 !important;
+  color: #fff !important;
+}
+
+.snack-info .mdc-snackbar__surface {
+  background-color: #2196f3 !important;
+  color: #fff !important;
+}
+
+.snack-warning .mdc-snackbar__surface {
+  background-color: #ff9800 !important;
+  color: #fff !important;
+}

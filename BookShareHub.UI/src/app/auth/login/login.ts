@@ -1,13 +1,15 @@
 import { Component } from '@angular/core';
-import { AuthService } from '../../core/services/auth.service';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
 
 import { MatFormFieldModule } from '@angular/material/form-field';
-import { CommonModule } from '@angular/common';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+
+import { AuthService } from '../../core/services/auth.service';
+import { NotificationService } from '../../core/services/notification.service';
 import { getErrorMessage } from '../../core/erros/error-utils';
 
 @Component({
@@ -29,18 +31,19 @@ export class Login {
   constructor(
     private authService: AuthService,
     private router: Router,
+    private notification: NotificationService,
   ) {}
 
   onSubmit() {
     this.authService.login(this.loginData).subscribe({
-      next: (res) => {
+      next: () => {
         this.router.navigate(['/books']);
       },
       error: (err) => {
         if (err.status === 401) {
-          alert('Invalid email or password. Please try again.');
+          this.notification.error('Invalid email or password. Please try again.');
         } else {
-          alert(getErrorMessage(err));
+          this.notification.error(getErrorMessage(err));
         }
       },
     });

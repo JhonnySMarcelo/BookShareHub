@@ -1,8 +1,10 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+
 import { BookService } from '../book-service';
-import { Book } from '../models/Book';
+import { NotificationService } from '../../core/services/notification.service';
 import { getErrorMessage } from '../../core/erros/error-utils';
+import { Book } from '../models/Book';
 
 @Component({
   selector: 'app-book-list',
@@ -30,7 +32,10 @@ export class BookList implements OnInit {
     available: true,
   };
 
-  constructor(private bookService: BookService) {}
+  constructor(
+    private bookService: BookService,
+    private notification: NotificationService,
+  ) {}
 
   ngOnInit(): void {
     this.loadBooks();
@@ -43,7 +48,7 @@ export class BookList implements OnInit {
         this.books.set(data);
       },
       error: (err) => {
-        alert(getErrorMessage(err));
+        this.notification.error(getErrorMessage(err));
       },
     });
   }
@@ -52,6 +57,7 @@ export class BookList implements OnInit {
     this.bookService.create(this.newBook).subscribe({
       next: (book) => {
         this.books.update((books) => [...books, book]);
+        this.notification.success('Book created successfully!');
 
         this.newBook = {
           title: '',
@@ -61,7 +67,7 @@ export class BookList implements OnInit {
         };
       },
       error: (err) => {
-        alert(getErrorMessage(err));
+        this.notification.error(getErrorMessage(err));
       },
     });
   }
@@ -107,7 +113,7 @@ export class BookList implements OnInit {
         this.cancelEdit();
       },
       error: (err) => {
-        alert(getErrorMessage(err));
+        this.notification.error(getErrorMessage(err));
       },
     });
   }
@@ -142,9 +148,10 @@ export class BookList implements OnInit {
     this.bookService.delete(id).subscribe({
       next: () => {
         this.books.update((books) => books.filter((b) => b.id !== id));
+        this.notification.success('Book deleted successfully!');
       },
       error: (err) => {
-        alert(getErrorMessage(err));
+        this.notification.error(getErrorMessage(err));
       },
     });
   }

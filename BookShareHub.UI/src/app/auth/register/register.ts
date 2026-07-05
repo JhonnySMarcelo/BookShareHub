@@ -1,7 +1,9 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+
 import { UserService } from '../../users/user.service';
+import { NotificationService } from '../../core/services/notification.service';
 import { getErrorMessage } from '../../core/erros/error-utils';
 
 @Component({
@@ -17,6 +19,7 @@ export class Register {
   constructor(
     private userService: UserService,
     private router: Router,
+    private notification: NotificationService,
   ) {}
 
   register() {
@@ -24,11 +27,11 @@ export class Register {
       .register({ username: this.username, email: this.email, password: this.password })
       .subscribe({
         next: () => {
-          alert('User registered successfully!');
+          this.notification.success('User registered successfully!');
           this.router.navigate(['/login']);
         },
         error: (err) => {
-          alert(getErrorMessage(err));
+          this.notification.error(getErrorMessage(err));
         },
       });
   }
