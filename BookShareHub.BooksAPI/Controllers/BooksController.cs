@@ -1,7 +1,7 @@
-﻿using BookShareHub.Application.Books.DTOs;
+﻿using BookShareHub.Application.Books.DTOs.Requests;
+using BookShareHub.Application.Books.DTOs.Responses;
 using BookShareHub.Application.Books.Services;
 using BookShareHub.Application.Users.Interfaces;
-using BookShareHub.Domain.Books.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -36,18 +36,19 @@ namespace BookShareHub.BooksAPI.Controllers
         /// The data transfer object containing the book details such as title, author, description, availability, and owner ID.
         /// </param>
         /// <returns>
-        /// Returns the created <see cref="Book"/> with status code 201 if successful,
+        /// Returns the created <see cref="BookResponse"/> with status code 201 if successful,
         /// or a <see cref="ValidationProblemDetails"/> with status code 400 if validation fails.
         /// </returns>
         [HttpPost]
         [Authorize]
-        [ProducesResponseType(typeof(Book), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(BookResponse), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<Book>> Create([FromBody] CreateBookDto request)
+        public async Task<ActionResult<BookResponse>> Create([FromBody] CreateBookRequest request)
         {
-            request.OwnerId = _currentUser.UserId!.Value;
-
-            var book = await _bookService.CreateAsync(request);
+            var book = await _bookService.CreateAsync(
+                request,
+                _currentUser.UserId!.Value
+                );
 
             return CreatedAtAction(nameof(GetById), new { id = book.Id }, book);
         }
@@ -57,16 +58,16 @@ namespace BookShareHub.BooksAPI.Controllers
         /// </summary>
         /// <param name="id">The unique identifier of the book.</param>
         /// <returns>
-        /// Returns the <see cref="Book"/> with status code 200 if found,
+        /// Returns the <see cref="BookResponse"/> with status code 200 if found,
         /// or 404 if not found.
         /// Validation errors (e.g., empty Guid) are automatically returned as <see cref="ValidationProblemDetails"/> with status code 400.
         /// </returns>
         [HttpGet("{id:guid}")]
         [Authorize]
-        [ProducesResponseType(typeof(Book), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(BookResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<Book>> GetById(Guid id)
+        public async Task<ActionResult<BookResponse>> GetById(Guid id)
         {
             var book = await _bookService.GetByIdAsync(id, _currentUser.UserId!.Value);
 
@@ -79,14 +80,14 @@ namespace BookShareHub.BooksAPI.Controllers
         /// Retrieves all books in the system.
         /// </summary>
         /// <returns>
-        /// Returns a list of <see cref="GetBookDto"/> with status code 200 if any are found,
+        /// Returns a list of <see cref="BookResponse"/> with status code 200 if any are found,
         /// or 404 if no books exist.
         /// </returns>
         [HttpGet]
         [AllowAnonymous]
-        [ProducesResponseType(typeof(IEnumerable<GetBookDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(IEnumerable<BookResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<IEnumerable<GetBookDto>>> GetAll()
+        public async Task<ActionResult<IEnumerable<BookResponse>>> GetAll()
         {
             var books = await _bookService.GetAllAsync(_currentUser.UserId);
 
@@ -102,16 +103,16 @@ namespace BookShareHub.BooksAPI.Controllers
         /// <param name="id">The unique identifier of the book.</param>
         /// <param name="dto">The fields to update (only non-null values will be applied).</param>
         /// <returns>
-        /// Returns the updated <see cref="Book"/> with status code 200 if successful,
+        /// Returns the updated <see cref="BookResponse"/> with status code 200 if successful,
         /// 404 if not found,
         /// or 400 if validation fails.
         /// </returns>
         [HttpPatch("{id:guid}")]
         [Authorize]
-        [ProducesResponseType(typeof(Book), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(BookResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<Book>> Update(Guid id, [FromBody] PatchBookDto dto)
+        public async Task<ActionResult<BookResponse>> Update(Guid id, [FromBody] PatchBookRequest dto)
         {
             var updatedBook = await _bookService.PatchAsync(id, dto, _currentUser.UserId!.Value);
 

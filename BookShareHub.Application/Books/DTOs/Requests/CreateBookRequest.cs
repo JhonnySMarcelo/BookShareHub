@@ -1,11 +1,10 @@
-﻿namespace BookShareHub.Application.Books.DTOs
+﻿namespace BookShareHub.Application.Books.DTOs.Requests
 {
-    public record CreateBookDto
+    public record CreateBookRequest
     {
         public string Title { get; set; } = string.Empty;
         public string Author { get; set; } = string.Empty;
         public string? Description { get; set; }
-        public bool Available { get; set; } = true;
-        public Guid OwnerId { get; set; }
+        public bool Available { get; init; }
     }
 }
