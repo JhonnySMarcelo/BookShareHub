@@ -1,6 +1,6 @@
 ﻿namespace BookShareHub.Application.Books.DTOs.Requests
 {
-    public record PatchBookRequest
+    public sealed record PatchBookRequest
     {
         public string? Title { get; init; }
         public string? Author { get; init; }

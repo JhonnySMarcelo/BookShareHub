@@ -1,6 +1,6 @@
 ﻿using BookShareHub.Application.Configurations;
 using BookShareHub.Application.Users.Services;
-using BookShareHub.Application.Users.DTOs;
+using BookShareHub.Application.Users.DTOs.Requests;
 using BookShareHub.Domain.Users.Entities;
 using BookShareHub.Domain.Users.Repositories;
 using Moq;

@@ -1,6 +1,6 @@
 ﻿namespace BookShareHub.Application.Books.DTOs.Responses
 {
-    public record BookResponse
+    public sealed record BookResponse
     {
         public Guid Id { get; init; }
         public string Title { get; init; } = string.Empty;

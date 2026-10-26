@@ -1,12 +1,9 @@
 ﻿using BookShareHub.Application.Configurations;
-using BookShareHub.Application.Users.DTOs;
+using BookShareHub.Application.Users.DTOs.Requests;
 using BookShareHub.Domain.Users.Entities;
 using BookShareHub.Domain.Users.Repositories;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
-using Microsoft.IdentityModel.Tokens;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 
