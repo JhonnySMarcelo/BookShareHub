@@ -9,6 +9,9 @@ namespace BookShareHub.Application.Books.Mappers
             Book book,
             Guid? currentUserId = null)
         {
+            var isOwner = currentUserId.HasValue &&
+                      book.OwnerId == currentUserId.Value;
+
             return new BookResponse
             {
                 Id = book.Id,
@@ -16,8 +19,8 @@ namespace BookShareHub.Application.Books.Mappers
                 Author = book.Author,
                 Description = book.Description,
                 Available = book.Available,
-                IsOwner = currentUserId.HasValue &&
-                          book.OwnerId == currentUserId.Value
+                IsOwner = isOwner,
+                BorrowerId = isOwner ? book.BorrowerId : null
             };
         }
     }

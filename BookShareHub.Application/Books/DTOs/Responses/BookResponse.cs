@@ -8,5 +8,6 @@
         public string? Description { get; init; }
         public bool Available { get; init; }
         public bool IsOwner { get; init; }
+        public Guid? BorrowerId { get; init; }
     }
 }
