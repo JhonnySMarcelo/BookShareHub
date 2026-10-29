@@ -1,5 +1,6 @@
 ﻿using BookShareHub.Application.Auth.Services;
 using BookShareHub.Application.Users.DTOs.Requests;
+using BookShareHub.Application.Users.DTOs.Responses;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -35,15 +36,15 @@ namespace BookShareHub.UsersAPI.Controllers
         /// </returns>
         [HttpPost("login")]
         [AllowAnonymous]
-        [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(LoginResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        public async Task<IActionResult> Login([FromBody] LoginUserDto dto)
+        public async Task<ActionResult<LoginResponse>> Login([FromBody] LoginUserDto dto)
         {
             var token = await _authService.LoginAsync(dto);
 
             if (token == null) return Unauthorized();
 
-            return Ok(new { Token = token });
+            return Ok(new LoginResponse { Token = token });
         }
 
         /// <summary>
@@ -55,10 +56,10 @@ namespace BookShareHub.UsersAPI.Controllers
         /// </returns>
         [HttpPost("logout")]
         [Authorize]
-        [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
-        public IActionResult Logout()
+        [ProducesResponseType(typeof(LogoutResponse), StatusCodes.Status200OK)]
+        public ActionResult<LogoutResponse> Logout()
         {
-            return Ok(new { Message = "Logged out successfully. Discard your JWT token." });
+            return Ok(new LogoutResponse { Message = "Logged out successfully. Discard your JWT token." });
         }
     }
 }
