@@ -131,9 +131,9 @@ namespace BookShareHub.Tests.Application.Users.UserServiceTests
 
             // Assert
             Assert.NotNull(result);
-            Assert.NotEqual("oldhash", result!.PasswordHash);
-            Assert.False(string.IsNullOrWhiteSpace(result.PasswordHash));
-            _userRepoMock.Verify(r => r.PatchAsync(It.Is<User>(u => u.PasswordHash != "oldhash")), Times.Once);
+            _userRepoMock.Verify(r => r.PatchAsync(It.Is<User>(u =>
+                u.PasswordHash != "oldhash" &&
+                !string.IsNullOrWhiteSpace(u.PasswordHash))), Times.Once);
         }
 
         [Fact]
@@ -160,7 +160,6 @@ namespace BookShareHub.Tests.Application.Users.UserServiceTests
             Assert.NotNull(result);
             Assert.Equal("newname", result!.Username);
             Assert.Equal("new@example.com", result.Email);
-            Assert.NotEqual("oldhash", result.PasswordHash);
             _userRepoMock.Verify(r => r.PatchAsync(It.Is<User>(u =>
                 u.Username == "newname" &&
                 u.Email == "new@example.com" &&

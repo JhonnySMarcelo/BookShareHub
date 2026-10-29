@@ -40,7 +40,9 @@ namespace BookShareHub.Tests.Application.Users.UserServiceTests
 
             _userRepoMock.Setup(r => r.FindAsync(It.IsAny<Dictionary<string, object>>()))
                          .ReturnsAsync((User?)null);
+            User? savedUser = null;
             _userRepoMock.Setup(r => r.AddAsync(It.IsAny<User>()))
+                         .Callback<User>(user => savedUser = user)
                          .Returns(Task.CompletedTask);
 
             // Act
@@ -50,6 +52,10 @@ namespace BookShareHub.Tests.Application.Users.UserServiceTests
             Assert.NotNull(result);
             Assert.Equal(dto.Username, result.Username);
             Assert.Equal(dto.Email, result.Email);
+            Assert.NotNull(savedUser);
+            Assert.Equal(savedUser.Id, result.Id);
+            Assert.Equal(savedUser.CreationTime, result.CreationTime);
+            Assert.Null(result.GetType().GetProperty(nameof(User.PasswordHash)));
             _userRepoMock.Verify(r => r.AddAsync(It.IsAny<User>()), Times.Once);
         }
 
@@ -156,11 +162,12 @@ namespace BookShareHub.Tests.Application.Users.UserServiceTests
                          .Returns(Task.CompletedTask);
 
             // Act
-            var result = await _service.CreateAsync(dto);
+            await _service.CreateAsync(dto);
 
             // Assert
-            Assert.NotEqual("StrongPassword123", result.PasswordHash);
-            Assert.False(string.IsNullOrWhiteSpace(result.PasswordHash));
+            _userRepoMock.Verify(r => r.AddAsync(It.Is<User>(user =>
+                user.PasswordHash != dto.Password &&
+                !string.IsNullOrWhiteSpace(user.PasswordHash))), Times.Once);
         }
     }
 }
