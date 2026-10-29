@@ -1,5 +1,7 @@
 ﻿using BookShareHub.Application.Configurations;
 using BookShareHub.Application.Users.DTOs.Requests;
+using BookShareHub.Application.Users.DTOs.Responses;
+using BookShareHub.Application.Users.Mappers;
 using BookShareHub.Domain.Users.Entities;
 using BookShareHub.Domain.Users.Repositories;
 using Microsoft.AspNetCore.Identity;
@@ -20,7 +22,7 @@ namespace BookShareHub.Application.Users.Services
             _jwtSettings = jwtSettings.Value ?? throw new ArgumentNullException(nameof(jwtSettings));
         }
 
-        public async Task<User> CreateAsync(RegisterUserDto dto)
+        public async Task<UserResponse> CreateAsync(RegisterUserDto dto)
         {
             if (dto == null)
                 throw new ArgumentNullException(nameof(dto));
@@ -43,17 +45,19 @@ namespace BookShareHub.Application.Users.Services
 
             await _userRepository.AddAsync(user);
 
-            return user;
+            return UserMapper.ToResponse(user);
         }
-        public async Task<User?> GetByIdAsync(Guid id)
+        public async Task<UserResponse?> GetByIdAsync(Guid id)
         {
             if (id == Guid.Empty)
                 throw new ArgumentException("Id cannot be empty.", nameof(id));
 
-            return await _userRepository.FindAsync(new Dictionary<string, object>
+            var user = await _userRepository.FindAsync(new Dictionary<string, object>
             {
                 { "Id", id }
             });
+
+            return user is null ? null : UserMapper.ToResponse(user);
         }
 
         public async Task<bool?> DeleteAsync(Guid id)
@@ -73,7 +77,7 @@ namespace BookShareHub.Application.Users.Services
             return true;
         }
 
-        public async Task<User?> PatchAsync(Guid id, UpdateUserDto dto)
+        public async Task<UserResponse?> PatchAsync(Guid id, UpdateUserDto dto)
         {
             if (id == Guid.Empty)
                 throw new ArgumentException("User Id cannot be empty.", nameof(id));
@@ -98,7 +102,9 @@ namespace BookShareHub.Application.Users.Services
             if (dto.Password != null)
                 user.UpdatePasswordHash(HashPassword(dto.Password));
 
-            return await _userRepository.PatchAsync(user);
+            var updatedUser = await _userRepository.PatchAsync(user);
+
+            return updatedUser is null ? null : UserMapper.ToResponse(updatedUser);
         }
 
         private string HashPassword(string password)

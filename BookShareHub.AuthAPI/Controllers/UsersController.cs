@@ -1,8 +1,8 @@
 ﻿using BookShareHub.Application.Users.DTOs;
 using BookShareHub.Application.Users.Interfaces;
 using BookShareHub.Application.Users.DTOs.Requests;
+using BookShareHub.Application.Users.DTOs.Responses;
 using BookShareHub.Application.Users.Services;
-using BookShareHub.Domain.Users.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -36,17 +36,17 @@ namespace BookShareHub.UsersAPI.Controllers
         /// The data transfer object containing the user details such as username, email, and password.
         /// </param>
         /// <returns>
-        /// Returns the created <see cref="User"/> with status code 201 if successful,
+        /// Returns the created <see cref="UserResponse"/> with status code 201 if successful,
         /// or a <see cref="ValidationProblemDetails"/> with status code 400 if validation fails.
         /// </returns>
         [HttpPost("register")]
         [AllowAnonymous]
-        [ProducesResponseType(typeof(User), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(UserResponse), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<User>> Register([FromBody] RegisterUserDto request)
+        public async Task<ActionResult<UserResponse>> Register([FromBody] RegisterUserDto request)
         {
             var user = await _userService.CreateAsync(request);
-            return Created($"api/users/{user.Id}", user);
+            return CreatedAtAction(nameof(Me), null, user);
         }
 
         /// <summary>
@@ -58,9 +58,9 @@ namespace BookShareHub.UsersAPI.Controllers
         /// </returns>
         [HttpGet("me")]
         [Authorize]
-        [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(UserResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        public async Task<ActionResult<User>> Me()
+        public async Task<ActionResult<UserResponse>> Me()
         {
             var user = await _userService.GetByIdAsync(_currentUser.UserId!.Value);
             if (user == null) return Unauthorized();
@@ -74,7 +74,7 @@ namespace BookShareHub.UsersAPI.Controllers
         /// <param name="dto">The fields to update (only non-null values will be applied).</param>
         /// <returns>
         /// Returns:
-        /// - <see cref="StatusCodes.Status200OK"/> with the updated <see cref="User"/> if successful.
+        /// - <see cref="StatusCodes.Status200OK"/> with the updated <see cref="UserResponse"/> if successful.
         /// - <see cref="StatusCodes.Status404NotFound"/> if the user does not exist.
         /// - <see cref="StatusCodes.Status400BadRequest"/> if validation fails.
         /// - <see cref="StatusCodes.Status401Unauthorized"/> if the request has no valid JWT.
@@ -82,12 +82,12 @@ namespace BookShareHub.UsersAPI.Controllers
         /// </returns>
         [HttpPatch("me")]
         [Authorize]
-        [ProducesResponseType(typeof(User), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(UserResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        public async Task<ActionResult<User>> Update([FromBody] UpdateUserDto dto)
+        public async Task<ActionResult<UserResponse>> Update([FromBody] UpdateUserDto dto)
         {
             var updatedUser = await _userService.PatchAsync(_currentUser.UserId!.Value, dto);
             if (updatedUser == null) return NotFound();
