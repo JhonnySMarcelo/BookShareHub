@@ -38,10 +38,7 @@ namespace BookShareHub.Application.Users.Services
 
             var user = new User(dto.Username, dto.Email, "TempHash");
 
-            var passwordHasher = new PasswordHasher<User>();
-            var passwordHash = passwordHasher.HashPassword(user, dto.Password);
-
-            user.UpdatePasswordHash(passwordHash);
+            user.UpdatePasswordHash(HashPassword(user, dto.Password));
 
             await _userRepository.AddAsync(user);
 
@@ -100,18 +97,17 @@ namespace BookShareHub.Application.Users.Services
                 user.UpdateEmail(dto.Email);
 
             if (dto.Password != null)
-                user.UpdatePasswordHash(HashPassword(dto.Password));
+                user.UpdatePasswordHash(HashPassword(user, dto.Password));
 
             var updatedUser = await _userRepository.PatchAsync(user);
 
             return updatedUser is null ? null : UserMapper.ToResponse(updatedUser);
         }
 
-        private string HashPassword(string password)
+        private string HashPassword(User user, string password)
         {
-            using var sha = SHA256.Create();
-            var bytes = sha.ComputeHash(Encoding.UTF8.GetBytes(password));
-            return Convert.ToBase64String(bytes);
+            var passwordHasher = new PasswordHasher<User>();
+            return passwordHasher.HashPassword(user, password);
         }
 
     }

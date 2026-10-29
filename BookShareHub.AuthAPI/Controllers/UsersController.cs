@@ -46,17 +46,18 @@ namespace BookShareHub.UsersAPI.Controllers
         public async Task<ActionResult<UserResponse>> Register([FromBody] RegisterUserDto request)
         {
             var user = await _userService.CreateAsync(request);
-            return CreatedAtAction(nameof(Me), null, user);
+            return StatusCode(StatusCodes.Status201Created, user);        
         }
 
         /// <summary>
         /// Retrieves information about the currently authenticated user.
         /// </summary>
         /// <returns>
-        /// Returns the username and email of the authenticated user with status code 200,
-        /// or 401 if the user is not authenticated.
+        /// The authenticated user's profile, including their ID, username,
+        /// email address, and account creation time.
         /// </returns>
-        [HttpGet("me")]
+        /// <response code="200">Returns the authenticated user's profile.</response>
+        /// <response code="401">The request is not authenticated or the user could not be identified.</response>        [HttpGet("me")]
         [Authorize]
         [ProducesResponseType(typeof(UserResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
