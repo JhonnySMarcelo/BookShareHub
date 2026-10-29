@@ -4,7 +4,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
 import { jwtDecode } from 'jwt-decode';
 
-interface LoginResponse {
+interface Login {
   token: string;
 }
 
@@ -42,8 +42,8 @@ export class AuthService {
     }
   }
 
-  login(data: { email: string; password: string }): Observable<LoginResponse> {
-    return this.http.post<LoginResponse>(`${this.apiUrl}/login`, data).pipe(
+  login(data: { email: string; password: string }): Observable<Login> {
+    return this.http.post<Login>(`${this.apiUrl}/login`, data).pipe(
       tap((response) => {
         localStorage.setItem('token', response.token);
       }),
