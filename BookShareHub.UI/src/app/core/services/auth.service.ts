@@ -4,6 +4,10 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
 import { jwtDecode } from 'jwt-decode';
 
+interface LoginResponse {
+  token: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private apiUrl = '/api/auth';
@@ -38,8 +42,8 @@ export class AuthService {
     }
   }
 
-  login(data: { email: string; password: string }): Observable<any> {
-    return this.http.post<{ token: string }>(`${this.apiUrl}/login`, data).pipe(
+  login(data: { email: string; password: string }): Observable<LoginResponse> {
+    return this.http.post<LoginResponse>(`${this.apiUrl}/login`, data).pipe(
       tap((response) => {
         localStorage.setItem('token', response.token);
       }),
