@@ -5,6 +5,7 @@ using BookShareHub.Domain.Users.Entities;
 using BookShareHub.Domain.Users.Repositories;
 using Moq;
 using Microsoft.Extensions.Options;
+using Microsoft.AspNetCore.Identity;
 
 namespace BookShareHub.Tests.Application.Users.UserServiceTests
 {
@@ -158,16 +159,24 @@ namespace BookShareHub.Tests.Application.Users.UserServiceTests
 
             _userRepoMock.Setup(r => r.FindAsync(It.IsAny<Dictionary<string, object>>()))
                          .ReturnsAsync((User?)null);
+            User? savedUser = null;
             _userRepoMock.Setup(r => r.AddAsync(It.IsAny<User>()))
+                         .Callback<User>(user => savedUser = user)
                          .Returns(Task.CompletedTask);
 
             // Act
             await _service.CreateAsync(dto);
 
             // Assert
-            _userRepoMock.Verify(r => r.AddAsync(It.Is<User>(user =>
-                user.PasswordHash != dto.Password &&
-                !string.IsNullOrWhiteSpace(user.PasswordHash))), Times.Once);
+            Assert.NotNull(savedUser);
+            Assert.NotEqual(dto.Password, savedUser.PasswordHash);
+
+            var passwordHasher = new PasswordHasher<User>();
+            Assert.Equal(
+                PasswordVerificationResult.Success,
+                passwordHasher.VerifyHashedPassword(savedUser, savedUser.PasswordHash, dto.Password));
+
+            _userRepoMock.Verify(r => r.AddAsync(It.IsAny<User>()), Times.Once);
         }
     }
 }
