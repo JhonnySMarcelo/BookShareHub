@@ -46,6 +46,23 @@ namespace BookShareHub.Tests.Application.Auth.AuthServiceTests
         }
 
         [Fact]
+        public async Task Should_Trim_Email_When_Looking_Up_User()
+        {
+            // Arrange
+            var dto = new LoginUserDto { Email = " missing@example.com ", Password = "password" };
+            _userRepoMock.Setup(r => r.FindAsync(It.IsAny<Dictionary<string, object>>()))
+                         .ReturnsAsync((User?)null);
+
+            // Act
+            var result = await _service.LoginAsync(dto);
+
+            // Assert
+            Assert.Null(result);
+            _userRepoMock.Verify(r => r.FindAsync(It.Is<Dictionary<string, object>>(criteria =>
+                Equals(criteria["Email"], "missing@example.com"))), Times.Once);
+        }
+
+        [Fact]
         public async Task Should_Return_Null_When_Password_Is_Invalid()
         {
             // Arrange

@@ -34,9 +34,11 @@ namespace BookShareHub.Tests.Application.Users.UserServiceTests
             var emptyId = Guid.Empty;
             var dto = new UpdateUserDto { Username = "newname" };
 
-            // Act & Assert
-            await Assert.ThrowsAsync<ArgumentException>(() => _service.PatchAsync(emptyId, dto));
+            // Act
+            var exception = await Record.ExceptionAsync(() => _service.PatchAsync(emptyId, dto));
 
+            // Assert
+            Assert.IsType<ArgumentException>(exception);
             _userRepoMock.Verify(r => r.FindAsync(It.IsAny<Dictionary<string, object>>()), Times.Never);
             _userRepoMock.Verify(r => r.PatchAsync(It.IsAny<User>()), Times.Never);
         }
@@ -47,9 +49,11 @@ namespace BookShareHub.Tests.Application.Users.UserServiceTests
             // Arrange
             var id = Guid.NewGuid();
 
-            // Act & Assert
-            await Assert.ThrowsAsync<ArgumentNullException>(() => _service.PatchAsync(id, null!));
+            // Act
+            var exception = await Record.ExceptionAsync(() => _service.PatchAsync(id, null!));
 
+            // Assert
+            Assert.IsType<ArgumentNullException>(exception);
             _userRepoMock.Verify(r => r.FindAsync(It.IsAny<Dictionary<string, object>>()), Times.Never);
             _userRepoMock.Verify(r => r.PatchAsync(It.IsAny<User>()), Times.Never);
         }
@@ -112,6 +116,33 @@ namespace BookShareHub.Tests.Application.Users.UserServiceTests
             Assert.NotNull(result);
             Assert.Equal("new@example.com", result!.Email);
             _userRepoMock.Verify(r => r.PatchAsync(It.Is<User>(u => u.Email == "new@example.com")), Times.Once);
+        }
+
+        [Fact]
+        public async Task Should_Trim_Username_And_Email_When_Updating()
+        {
+            // Arrange
+            var user = new User("oldname", "old@example.com", "hash");
+            var dto = new UpdateUserDto
+            {
+                Username = " newname ",
+                Email = " new@example.com "
+            };
+
+            _userRepoMock.Setup(r => r.FindAsync(It.IsAny<Dictionary<string, object>>()))
+                         .ReturnsAsync(user);
+            _userRepoMock.Setup(r => r.PatchAsync(It.IsAny<User>()))
+                         .ReturnsAsync(user);
+
+            // Act
+            var result = await _service.PatchAsync(user.Id, dto);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Equal("newname", result!.Username);
+            Assert.Equal("new@example.com", result.Email);
+            _userRepoMock.Verify(r => r.PatchAsync(It.Is<User>(u =>
+                u.Username == "newname" && u.Email == "new@example.com")), Times.Once);
         }
 
         [Fact]
