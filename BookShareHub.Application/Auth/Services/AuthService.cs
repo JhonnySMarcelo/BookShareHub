@@ -26,7 +26,7 @@ namespace BookShareHub.Application.Auth.Services
         {
             var user = await _userRepository.FindAsync(new Dictionary<string, object>
             {
-                { "Email", dto.Email }
+                { "Email", dto.Email.Trim() }
             });
 
             if (user == null) return null;

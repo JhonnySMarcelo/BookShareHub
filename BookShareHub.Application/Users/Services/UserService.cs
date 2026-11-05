@@ -1,18 +1,21 @@
 ﻿using BookShareHub.Application.Configurations;
 using BookShareHub.Application.Users.DTOs.Requests;
 using BookShareHub.Application.Users.DTOs.Responses;
+using BookShareHub.Application.Users.Exceptions;
 using BookShareHub.Application.Users.Mappers;
 using BookShareHub.Domain.Users.Entities;
 using BookShareHub.Domain.Users.Repositories;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
-using System.Security.Cryptography;
-using System.Text;
+using System.Net.Mail;
 
 namespace BookShareHub.Application.Users.Services
 {
     public class UserService
     {
+        private const int MinPasswordLength = 8;
+        private const int MaxPasswordLength = 128;
+
         private readonly IUserRepository _userRepository;
         private readonly JwtSettings _jwtSettings;
 
@@ -27,16 +30,32 @@ namespace BookShareHub.Application.Users.Services
             if (dto == null)
                 throw new ArgumentNullException(nameof(dto));
 
+            var (username, email) = NormalizeAndValidateRegistration(dto);
+
+            User user;
+            try
+            {
+                user = new User(username, email, "TempHash");
+            }
+            catch (ArgumentException exception) when (exception.ParamName is "username" or "email")
+            {
+                var field = exception.ParamName == "username"
+                    ? nameof(RegisterUserDto.Username)
+                    : nameof(RegisterUserDto.Email);
+                throw new UserValidationException(new Dictionary<string, string[]>
+                {
+                    [field] = [exception.Message]
+                });
+            }
+
             var existing = await _userRepository.FindAsync(new Dictionary<string, object>
             {
-                { "Email", dto.Email },
-                { "Username", dto.Username }
+                { "Email", email },
+                { "Username", username }
             });
 
             if (existing != null)
                 throw new InvalidOperationException("User with same email or username already exists.");
-
-            var user = new User(dto.Username, dto.Email, "TempHash");
 
             user.UpdatePasswordHash(HashPassword(user, dto.Password));
 
@@ -44,6 +63,34 @@ namespace BookShareHub.Application.Users.Services
 
             return UserMapper.ToResponse(user);
         }
+
+        private static (string Username, string Email) NormalizeAndValidateRegistration(RegisterUserDto dto)
+        {
+            var errors = new Dictionary<string, string[]>();
+
+            if (string.IsNullOrWhiteSpace(dto.Password))
+                errors[nameof(dto.Password)] = ["Password is required."];
+            else if (dto.Password.Length < MinPasswordLength || dto.Password.Length > MaxPasswordLength)
+                errors[nameof(dto.Password)] = [$"Password must be between {MinPasswordLength} and {MaxPasswordLength} characters."];
+
+            var username = dto.Username?.Trim() ?? string.Empty;
+            var email = dto.Email?.Trim() ?? string.Empty;
+
+            if (email.Length > 0 && !IsEmailAddress(email))
+                errors[nameof(dto.Email)] = ["Email address is not valid."];
+
+            if (errors.Count > 0)
+                throw new UserValidationException(errors);
+
+            return (username, email);
+        }
+
+        private static bool IsEmailAddress(string email)
+        {
+            return MailAddress.TryCreate(email, out var address)
+                && string.Equals(address.Address, email, StringComparison.OrdinalIgnoreCase);
+        }
+
         public async Task<UserResponse?> GetByIdAsync(Guid id)
         {
             if (id == Guid.Empty)
@@ -91,10 +138,10 @@ namespace BookShareHub.Application.Users.Services
                 return null;
 
             if (dto.Username != null)
-                user.UpdateUsername(dto.Username);
+                user.UpdateUsername(dto.Username.Trim());
 
             if (dto.Email != null)
-                user.UpdateEmail(dto.Email);
+                user.UpdateEmail(dto.Email.Trim());
 
             if (dto.Password != null)
                 user.UpdatePasswordHash(HashPassword(user, dto.Password));

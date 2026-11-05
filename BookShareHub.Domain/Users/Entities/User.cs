@@ -5,8 +5,8 @@
     /// </summary>
     public class User
     {
-        private const int MaxUsernameLength = 100;
-        private const int MaxEmailLength = 200;
+        public const int MaxUsernameLength = 100;
+        public const int MaxEmailLength = 200;
         private const int MaxPasswordHashLength = 200;
 
         /// <summary>
@@ -39,19 +39,19 @@
         public User(string username, string email, string passwordHash)
         {
             if (string.IsNullOrWhiteSpace(username))
-                throw new ArgumentException("Username is required.");
+                throw new ArgumentException("Username is required.", nameof(username));
 
             if (username.Length > MaxUsernameLength)
                 throw new ArgumentOutOfRangeException(nameof(username), $"Username cannot exceed {MaxUsernameLength} characters.");
 
             if (string.IsNullOrWhiteSpace(email))
-                throw new ArgumentException("Email is required.");
+                throw new ArgumentException("Email is required.", nameof(email));
 
             if (email.Length > MaxEmailLength)
                 throw new ArgumentOutOfRangeException(nameof(email), $"Email cannot exceed {MaxEmailLength} characters.");
 
             if (string.IsNullOrWhiteSpace(passwordHash))
-                throw new ArgumentException("PasswordHash is required.");
+                throw new ArgumentException("PasswordHash is required.", nameof(passwordHash));
 
             if (passwordHash.Length > MaxPasswordHashLength)
                 throw new ArgumentOutOfRangeException(nameof(passwordHash), $"PasswordHash cannot exceed {MaxPasswordHashLength} characters.");
@@ -64,7 +64,7 @@
         public void UpdateUsername(string username)
         {
             if (string.IsNullOrWhiteSpace(username))
-                throw new ArgumentException("Username is required.");
+                throw new ArgumentException("Username is required.", nameof(username));
 
             if (username.Length > MaxUsernameLength)
                 throw new ArgumentOutOfRangeException(nameof(username), $"Username cannot exceed {MaxUsernameLength} characters.");
@@ -75,7 +75,7 @@
         public void UpdateEmail(string email)
         {
             if (string.IsNullOrWhiteSpace(email))
-                throw new ArgumentException("Email is required.");
+                throw new ArgumentException("Email is required.", nameof(email));
 
             if (email.Length > MaxEmailLength)
                 throw new ArgumentOutOfRangeException(nameof(email), $"Email cannot exceed {MaxEmailLength} characters.");
@@ -86,7 +86,7 @@
         public void UpdatePasswordHash(string passwordHash)
         {
             if (string.IsNullOrWhiteSpace(passwordHash))
-                throw new ArgumentException("PasswordHash is required.");
+                throw new ArgumentException("PasswordHash is required.", nameof(passwordHash));
 
             if (passwordHash.Length > MaxPasswordHashLength)
                 throw new ArgumentOutOfRangeException(nameof(passwordHash), $"PasswordHash cannot exceed {MaxPasswordHashLength} characters.");

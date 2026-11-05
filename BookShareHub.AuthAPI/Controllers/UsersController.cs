@@ -1,7 +1,7 @@
-﻿using BookShareHub.Application.Users.DTOs;
-using BookShareHub.Application.Users.Interfaces;
+﻿using BookShareHub.Application.Users.Interfaces;
 using BookShareHub.Application.Users.DTOs.Requests;
 using BookShareHub.Application.Users.DTOs.Responses;
+using BookShareHub.Application.Users.Exceptions;
 using BookShareHub.Application.Users.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -45,8 +45,15 @@ namespace BookShareHub.UsersAPI.Controllers
         [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<UserResponse>> Register([FromBody] RegisterUserDto request)
         {
-            var user = await _userService.CreateAsync(request);
-            return StatusCode(StatusCodes.Status201Created, user);        
+            try
+            {
+                var user = await _userService.CreateAsync(request);
+                return StatusCode(StatusCodes.Status201Created, user);
+            }
+            catch (UserValidationException exception)
+            {
+                return ValidationProblem(new ValidationProblemDetails(exception.Errors));
+            }
         }
 
         /// <summary>
