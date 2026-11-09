@@ -6,6 +6,7 @@ import { catchError, throwError } from 'rxjs';
 
 import { NotificationService } from '../services/notification.service';
 import { AuthService } from '../services/auth.service';
+import { SUPPRESS_ERROR_NOTIFICATION } from './error-notification.context';
 
 export const errorInterceptor: HttpInterceptorFn = (req, next) => {
   const authService = inject(AuthService);
@@ -21,16 +22,22 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
         error,
       });
 
+      const suppressNotification = req.context.get(SUPPRESS_ERROR_NOTIFICATION);
+
       if (error.status === 401 && router.url !== '/login') {
         authService.logout();
-        notification.error('Your session has expired. Please sign in again.');
+        if (!suppressNotification) {
+          notification.error('Your session has expired. Please sign in again.');
+        }
         router.navigate(['/login']);
-      } else if (error.status === 0) {
-        notification.error('Unable to connect to the server.');
-      } else if (error.status >= 500) {
-        notification.error('Internal server error.');
-      } else {
-        notification.error(error.error?.message ?? 'Unexpected error.');
+      } else if (!suppressNotification) {
+        if (error.status === 0) {
+          notification.error('Unable to connect to the server.');
+        } else if (error.status >= 500) {
+          notification.error('Internal server error.');
+        } else {
+          notification.error(error.error?.message ?? 'Unexpected error.');
+        }
       }
 
       return throwError(() => error);

@@ -1,9 +1,10 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpContext } from '@angular/common/http';
 
 import { Observable } from 'rxjs';
 
 import { User } from './models/User';
+import { SUPPRESS_ERROR_NOTIFICATION } from '../core/interceptors/error-notification.context';
 
 @Injectable({
   providedIn: 'root',
@@ -13,7 +14,8 @@ export class UserService {
   constructor(private http: HttpClient) {}
 
   register(data: { username: string; email: string; password: string }): Observable<User> {
-    return this.http.post<User>(`${this.apiUrl}/register`, data);
+    const context = new HttpContext().set(SUPPRESS_ERROR_NOTIFICATION, true);
+    return this.http.post<User>(`${this.apiUrl}/register`, data, { context });
   }
 
   me(): Observable<User> {

@@ -1,15 +1,54 @@
 <div class="register-container">
   <div class="register-card">
     <h2>Create Account</h2>
-    <form (ngSubmit)="register()">
+    <form (ngSubmit)="register(registerForm)" #registerForm="ngForm">
       <mat-form-field appearance="outline" class="full-width">
         <mat-label>Username</mat-label>
-        <input matInput type="text" name="username" [(ngModel)]="username" required />
+        <input
+          matInput
+          type="text"
+          name="username"
+          [(ngModel)]="username"
+          required
+          pattern=".*\S.*"
+          maxlength="100"
+          #usernameField="ngModel"
+        />
+        @if (usernameField.invalid && (usernameField.dirty || usernameField.touched)) {
+          <mat-error>
+            @if (usernameField.hasError('required') || usernameField.hasError('pattern')) {
+              Username is required.
+            } @else if (usernameField.hasError('maxlength')) {
+              Username cannot exceed 100 characters.
+            }
+          </mat-error>
+        }
       </mat-form-field>
 
       <mat-form-field appearance="outline" class="full-width">
         <mat-label>Email</mat-label>
-        <input matInput type="email" name="email" [(ngModel)]="email" required />
+        <input
+          matInput
+          type="email"
+          name="email"
+          [(ngModel)]="email"
+          required
+          email
+          pattern=".*\S.*"
+          maxlength="200"
+          #emailField="ngModel"
+        />
+        @if (emailField.invalid && (emailField.dirty || emailField.touched)) {
+          <mat-error>
+            @if (emailField.hasError('required') || emailField.hasError('pattern')) {
+              Email is required.
+            } @else if (emailField.hasError('email')) {
+              Enter a valid email address.
+            } @else if (emailField.hasError('maxlength')) {
+              Email cannot exceed 200 characters.
+            }
+          </mat-error>
+        }
       </mat-form-field>
 
       <mat-form-field appearance="outline" class="full-width">
@@ -20,12 +59,62 @@
           name="password"
           [(ngModel)]="password"
           required
+          minlength="8"
+          maxlength="128"
+          pattern=".*\S.*"
+          #passwordField="ngModel"
         />
+        @if (passwordField.invalid && (passwordField.dirty || passwordField.touched)) {
+          <mat-error>
+            @if (passwordField.hasError('required') || passwordField.hasError('pattern')) {
+              Password is required.
+            } @else if (passwordField.hasError('minlength')) {
+              Password must be at least 8 characters.
+            } @else if (passwordField.hasError('maxlength')) {
+              Password cannot exceed 128 characters.
+            }
+          </mat-error>
+        }
       </mat-form-field>
 
-      <button mat-raised-button color="primary" class="register-btn" type="submit">
-        Register
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Confirm Password</mat-label>
+        <input
+          matInput
+          type="password"
+          name="confirmPassword"
+          [(ngModel)]="confirmPassword"
+          [appPasswordMatch]="password"
+          required
+          #confirmPasswordField="ngModel"
+        />
+        @if (
+          confirmPasswordField.invalid &&
+          (confirmPasswordField.dirty || confirmPasswordField.touched)
+        ) {
+          <mat-error>
+            @if (confirmPasswordField.hasError('required')) {
+              Please confirm your password.
+            } @else if (confirmPasswordField.hasError('passwordMismatch')) {
+              Passwords do not match.
+            }
+          </mat-error>
+        }
+      </mat-form-field>
+
+      <button
+        mat-raised-button
+        color="primary"
+        class="register-btn"
+        type="submit"
+        [disabled]="registerForm.invalid || isSubmitting()"
+      >
+        {{ isSubmitting() ? 'Registering...' : 'Register' }}
       </button>
+
+      @if (registrationError()) {
+        <p class="register-error" role="alert">{{ registrationError() }}</p>
+      }
 
       <div class="register-links">
         <a routerLink="/login">Back to Login</a>
