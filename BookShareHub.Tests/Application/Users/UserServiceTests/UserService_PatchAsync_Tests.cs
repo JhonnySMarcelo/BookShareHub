@@ -1,6 +1,7 @@
 ﻿using BookShareHub.Application.Configurations;
 using BookShareHub.Application.Users.Services;
 using BookShareHub.Application.Users.DTOs.Requests;
+using BookShareHub.Application.Users.Exceptions;
 using BookShareHub.Domain.Users.Entities;
 using BookShareHub.Domain.Users.Repositories;
 using Moq;
@@ -143,6 +144,102 @@ namespace BookShareHub.Tests.Application.Users.UserServiceTests
             Assert.Equal("new@example.com", result.Email);
             _userRepoMock.Verify(r => r.PatchAsync(It.Is<User>(u =>
                 u.Username == "newname" && u.Email == "new@example.com")), Times.Once);
+        }
+
+        [Theory]
+        [InlineData("")]
+        [InlineData("   ")]
+        public async Task Should_Throw_UserValidationException_When_Username_Is_Empty(string username)
+        {
+            // Arrange
+            var user = new User("oldname", "old@example.com", "hash");
+            _userRepoMock.Setup(r => r.FindAsync(It.IsAny<Dictionary<string, object>>()))
+                         .ReturnsAsync(user);
+            var dto = new UpdateUserDto { Username = username };
+
+            // Act
+            var exception = await Assert.ThrowsAsync<UserValidationException>(
+                () => _service.PatchAsync(user.Id, dto));
+
+            // Assert
+            Assert.Contains(nameof(UpdateUserDto.Username), exception.Errors.Keys);
+            _userRepoMock.Verify(r => r.PatchAsync(It.IsAny<User>()), Times.Never);
+        }
+
+        [Fact]
+        public async Task Should_Throw_UserValidationException_When_Username_Exceeds_Maximum_Length()
+        {
+            // Arrange
+            var user = new User("oldname", "old@example.com", "hash");
+            _userRepoMock.Setup(r => r.FindAsync(It.IsAny<Dictionary<string, object>>()))
+                         .ReturnsAsync(user);
+            var dto = new UpdateUserDto { Username = new string('u', 101) };
+
+            // Act
+            var exception = await Assert.ThrowsAsync<UserValidationException>(
+                () => _service.PatchAsync(user.Id, dto));
+
+            // Assert
+            Assert.Contains(nameof(UpdateUserDto.Username), exception.Errors.Keys);
+            _userRepoMock.Verify(r => r.PatchAsync(It.IsAny<User>()), Times.Never);
+        }
+
+        [Theory]
+        [InlineData("")]
+        [InlineData("   ")]
+        public async Task Should_Throw_UserValidationException_When_Email_Is_Empty(string email)
+        {
+            // Arrange
+            var user = new User("oldname", "old@example.com", "hash");
+            _userRepoMock.Setup(r => r.FindAsync(It.IsAny<Dictionary<string, object>>()))
+                         .ReturnsAsync(user);
+            var dto = new UpdateUserDto { Email = email };
+
+            // Act
+            var exception = await Assert.ThrowsAsync<UserValidationException>(
+                () => _service.PatchAsync(user.Id, dto));
+
+            // Assert
+            Assert.Contains(nameof(UpdateUserDto.Email), exception.Errors.Keys);
+            _userRepoMock.Verify(r => r.PatchAsync(It.IsAny<User>()), Times.Never);
+        }
+
+        [Theory]
+        [InlineData("not-an-email")]
+        [InlineData("Display Name <user@example.com>")]
+        public async Task Should_Throw_UserValidationException_When_Email_Format_Is_Invalid(string email)
+        {
+            // Arrange
+            var user = new User("oldname", "old@example.com", "hash");
+            _userRepoMock.Setup(r => r.FindAsync(It.IsAny<Dictionary<string, object>>()))
+                         .ReturnsAsync(user);
+            var dto = new UpdateUserDto { Email = email };
+
+            // Act
+            var exception = await Assert.ThrowsAsync<UserValidationException>(
+                () => _service.PatchAsync(user.Id, dto));
+
+            // Assert
+            Assert.Contains(nameof(UpdateUserDto.Email), exception.Errors.Keys);
+            _userRepoMock.Verify(r => r.PatchAsync(It.IsAny<User>()), Times.Never);
+        }
+
+        [Fact]
+        public async Task Should_Throw_UserValidationException_When_Email_Exceeds_Maximum_Length()
+        {
+            // Arrange
+            var user = new User("oldname", "old@example.com", "hash");
+            _userRepoMock.Setup(r => r.FindAsync(It.IsAny<Dictionary<string, object>>()))
+                         .ReturnsAsync(user);
+            var dto = new UpdateUserDto { Email = $"{new string('a', 189)}@example.com" };
+
+            // Act
+            var exception = await Assert.ThrowsAsync<UserValidationException>(
+                () => _service.PatchAsync(user.Id, dto));
+
+            // Assert
+            Assert.Contains(nameof(UpdateUserDto.Email), exception.Errors.Keys);
+            _userRepoMock.Verify(r => r.PatchAsync(It.IsAny<User>()), Times.Never);
         }
 
         [Fact]

@@ -39,13 +39,11 @@ namespace BookShareHub.Application.Users.Services
             }
             catch (ArgumentException exception) when (exception.ParamName is "username" or "email")
             {
-                var field = exception.ParamName == "username"
-                    ? nameof(RegisterUserDto.Username)
-                    : nameof(RegisterUserDto.Email);
-                throw new UserValidationException(new Dictionary<string, string[]>
-                {
-                    [field] = [exception.Message]
-                });
+                throw ToUserValidationException(
+                    exception,
+                    exception.ParamName == "username"
+                        ? nameof(RegisterUserDto.Username)
+                        : nameof(RegisterUserDto.Email));
             }
 
             var existing = await _userRepository.FindAsync(new Dictionary<string, object>
@@ -138,10 +136,37 @@ namespace BookShareHub.Application.Users.Services
                 return null;
 
             if (dto.Username != null)
-                user.UpdateUsername(dto.Username.Trim());
+            {
+                try
+                {
+                    user.UpdateUsername(dto.Username.Trim());
+                }
+                catch (ArgumentException exception) when (exception.ParamName == "username")
+                {
+                    throw ToUserValidationException(exception, nameof(UpdateUserDto.Username));
+                }
+            }
 
             if (dto.Email != null)
-                user.UpdateEmail(dto.Email.Trim());
+            {
+                var email = dto.Email.Trim();
+                if (email.Length > 0 && !IsEmailAddress(email))
+                {
+                    throw new UserValidationException(new Dictionary<string, string[]>
+                    {
+                        [nameof(UpdateUserDto.Email)] = ["Email address is not valid."]
+                    });
+                }
+
+                try
+                {
+                    user.UpdateEmail(email);
+                }
+                catch (ArgumentException exception) when (exception.ParamName == "email")
+                {
+                    throw ToUserValidationException(exception, nameof(UpdateUserDto.Email));
+                }
+            }
 
             if (dto.Password != null)
                 user.UpdatePasswordHash(HashPassword(user, dto.Password));
@@ -149,6 +174,14 @@ namespace BookShareHub.Application.Users.Services
             var updatedUser = await _userRepository.PatchAsync(user);
 
             return updatedUser is null ? null : UserMapper.ToResponse(updatedUser);
+        }
+
+        private static UserValidationException ToUserValidationException(ArgumentException exception, string field)
+        {
+            return new UserValidationException(new Dictionary<string, string[]>
+            {
+                [field] = [exception.Message]
+            });
         }
 
         private string HashPassword(User user, string password)

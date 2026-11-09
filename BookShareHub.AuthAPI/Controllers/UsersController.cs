@@ -58,13 +58,7 @@ namespace BookShareHub.UsersAPI.Controllers
             }
             catch (UserAlreadyExistsException)
             {
-                return Conflict(new ProblemDetails
-                {
-                    Type = "about:blank",
-                    Title = "Conflict",
-                    Status = StatusCodes.Status409Conflict,
-                    Detail = "Username or email is already in use."
-                });
+                return CreateDuplicateUserConflict();
             }
         }
 
@@ -97,6 +91,7 @@ namespace BookShareHub.UsersAPI.Controllers
         /// - <see cref="StatusCodes.Status200OK"/> with the updated <see cref="UserResponse"/> if successful.
         /// - <see cref="StatusCodes.Status404NotFound"/> if the user does not exist.
         /// - <see cref="StatusCodes.Status400BadRequest"/> if validation fails.
+        /// - <see cref="StatusCodes.Status409Conflict"/> if the username or email is already in use.
         /// - <see cref="StatusCodes.Status401Unauthorized"/> if the request has no valid JWT.
         /// - <see cref="StatusCodes.Status403Forbidden"/> if the authenticated user tries to update another user's profile.
         /// </returns>
@@ -105,17 +100,27 @@ namespace BookShareHub.UsersAPI.Controllers
         [ProducesResponseType(typeof(UserResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         public async Task<ActionResult<UserResponse>> Update([FromBody] UpdateUserDto dto)
         {
-            var updatedUser = await _userService.PatchAsync(_currentUser.UserId!.Value, dto);
-            if (updatedUser == null) return NotFound();
+            try
+            {
+                var updatedUser = await _userService.PatchAsync(_currentUser.UserId!.Value, dto);
+                if (updatedUser == null) return NotFound();
 
-            return Ok(updatedUser);
+                return Ok(updatedUser);
+            }
+            catch (UserValidationException exception)
+            {
+                return ValidationProblem(new ValidationProblemDetails(exception.Errors));
+            }
+            catch (UserAlreadyExistsException)
+            {
+                return CreateDuplicateUserConflict();
+            }
         }
-
-
 
         /// <summary>
         /// Deletes the currently authenticated user.
@@ -140,5 +145,17 @@ namespace BookShareHub.UsersAPI.Controllers
 
             return NoContent();
         }
+        
+        private ConflictObjectResult CreateDuplicateUserConflict()
+        {
+            return Conflict(new ProblemDetails
+            {
+                Type = "about:blank",
+                Title = "Conflict",
+                Status = StatusCodes.Status409Conflict,
+                Detail = "Username or email is already in use."
+            });
+        }
+
     }
 }
