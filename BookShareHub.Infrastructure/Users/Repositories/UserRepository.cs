@@ -1,5 +1,7 @@
 ﻿using BookShareHub.Domain.Users.Entities;
 using BookShareHub.Domain.Users.Repositories;
+using BookShareHub.Application.Users.Exceptions;
+using BookShareHub.Infrastructure.Users.Helpers;
 using Microsoft.Data.SqlClient;
 
 namespace BookShareHub.Infrastructure.Users.Repositories
@@ -28,7 +30,15 @@ namespace BookShareHub.Infrastructure.Users.Repositories
             command.Parameters.AddWithValue("@Email", user.Email);
             command.Parameters.AddWithValue("@CreationTime", user.CreationTime);
 
-            await command.ExecuteNonQueryAsync();
+            try
+            {
+                await command.ExecuteNonQueryAsync();
+            }
+            catch (SqlException exception) when (
+                UserSqlExceptionHelper.IsUsernameOrEmailUniqueConstraintViolation(exception.Number, exception.Message))
+            {
+                throw new UserAlreadyExistsException();
+            }
         }
 
         public async Task<User?> FindAsync(Dictionary<string, object> filters)
@@ -191,7 +201,17 @@ namespace BookShareHub.Infrastructure.Users.Repositories
             command.CommandText = $"UPDATE Users SET {string.Join(", ", updates)} WHERE Id = @Id";
             command.Parameters.AddWithValue("@Id", user.Id);
 
-            var rowsAffected = await command.ExecuteNonQueryAsync();
+            int rowsAffected;
+            try
+            {
+                rowsAffected = await command.ExecuteNonQueryAsync();
+            }
+            catch (SqlException exception) when (
+                UserSqlExceptionHelper.IsUsernameOrEmailUniqueConstraintViolation(exception.Number, exception.Message))
+            {
+                throw new UserAlreadyExistsException();
+            }
+
             if (rowsAffected == 0) return null;
 
             return await FindAsync(new Dictionary<string, object>
