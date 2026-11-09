@@ -37,12 +37,14 @@ namespace BookShareHub.UsersAPI.Controllers
         /// </param>
         /// <returns>
         /// Returns the created <see cref="UserResponse"/> with status code 201 if successful,
-        /// or a <see cref="ValidationProblemDetails"/> with status code 400 if validation fails.
+        /// a <see cref="ValidationProblemDetails"/> with status code 400 if validation fails,
+        /// or a <see cref="ProblemDetails"/> with status code 409 if the username or email is already in use.
         /// </returns>
         [HttpPost("register")]
         [AllowAnonymous]
         [ProducesResponseType(typeof(UserResponse), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
         public async Task<ActionResult<UserResponse>> Register([FromBody] RegisterUserDto request)
         {
             try
@@ -53,6 +55,16 @@ namespace BookShareHub.UsersAPI.Controllers
             catch (UserValidationException exception)
             {
                 return ValidationProblem(new ValidationProblemDetails(exception.Errors));
+            }
+            catch (UserAlreadyExistsException)
+            {
+                return Conflict(new ProblemDetails
+                {
+                    Type = "about:blank",
+                    Title = "Conflict",
+                    Status = StatusCodes.Status409Conflict,
+                    Detail = "Username or email is already in use."
+                });
             }
         }
 

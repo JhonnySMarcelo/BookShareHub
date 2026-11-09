@@ -65,7 +65,7 @@ namespace BookShareHub.Tests.Application.Users.UserServiceTests
         }
 
         [Fact]
-        public async Task Should_Throw_InvalidOperationException_When_Email_Already_Exists()
+        public async Task Should_Throw_UserAlreadyExistsException_When_Email_Already_Exists()
         {
             // Arrange
             var dto = new RegisterUserDto
@@ -83,12 +83,13 @@ namespace BookShareHub.Tests.Application.Users.UserServiceTests
             var exception = await Record.ExceptionAsync(() => _service.CreateAsync(dto));
 
             // Assert
-            Assert.IsType<InvalidOperationException>(exception);
+            Assert.IsType<UserAlreadyExistsException>(exception);
+            Assert.Equal("Username or email is already in use.", exception.Message);
             _userRepoMock.Verify(r => r.AddAsync(It.IsAny<User>()), Times.Never);
         }
 
         [Fact]
-        public async Task Should_Throw_InvalidOperationException_When_Username_Already_Exists()
+        public async Task Should_Throw_UserAlreadyExistsException_When_Username_Already_Exists()
         {
             // Arrange
             var dto = new RegisterUserDto
@@ -106,7 +107,8 @@ namespace BookShareHub.Tests.Application.Users.UserServiceTests
             var exception = await Record.ExceptionAsync(() => _service.CreateAsync(dto));
 
             // Assert
-            Assert.IsType<InvalidOperationException>(exception);
+            Assert.IsType<UserAlreadyExistsException>(exception);
+            Assert.Equal("Username or email is already in use.", exception.Message);
             _userRepoMock.Verify(r => r.AddAsync(It.IsAny<User>()), Times.Never);
         }
 

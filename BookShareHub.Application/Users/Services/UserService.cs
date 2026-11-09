@@ -55,7 +55,7 @@ namespace BookShareHub.Application.Users.Services
             });
 
             if (existing != null)
-                throw new InvalidOperationException("User with same email or username already exists.");
+                throw new UserAlreadyExistsException();
 
             user.UpdatePasswordHash(HashPassword(user, dto.Password));
 
