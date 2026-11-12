@@ -1,4 +1,5 @@
-﻿using BookShareHub.Application.Books.Services;
+﻿using BookShareHub.Application.Books.Exceptions;
+using BookShareHub.Application.Books.Services;
 using BookShareHub.Domain.Books.Entities;
 using BookShareHub.Domain.Books.Repositories;
 using Moq;
@@ -63,14 +64,14 @@ namespace BookShareHub.Tests.Application.Books.BookServiceTests
         }
 
         [Fact]
-        public async Task Should_Throw_InvalidOperationException_When_Book_Is_Not_Available()
+        public async Task Should_Throw_BookUnavailableException_When_Book_Is_Not_Available()
         {
             // Arrange
             var book = new Book("DDD", "Eric Evans", "Blue book", false, Guid.NewGuid());
             _bookRepoMock.Setup(r => r.GetByIdForOwnerAsync(book.Id, _ownerId)).ReturnsAsync(book);
 
             // Act & Assert
-            await Assert.ThrowsAsync<InvalidOperationException>(() => _service.DeleteAsync(book.Id, _ownerId));
+            await Assert.ThrowsAsync<BookUnavailableException>(() => _service.DeleteAsync(book.Id, _ownerId));
 
             _bookRepoMock.Verify(r => r.DeleteAsync(It.IsAny<Guid>(), _ownerId), Times.Never);
         }

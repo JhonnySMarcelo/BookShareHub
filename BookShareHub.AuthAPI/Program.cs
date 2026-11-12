@@ -2,6 +2,7 @@ using BookShareHub.Application.Auth.Services;
 using BookShareHub.Application.Configurations;
 using BookShareHub.Application.Users.Interfaces;
 using BookShareHub.Application.Users.Services;
+using BookShareHub.AuthAPI.ExceptionHandling;
 using BookShareHub.Domain.Users.Repositories;
 using BookShareHub.Infrastructure.Users.Identity;
 using BookShareHub.Infrastructure.Users.Repositories;
@@ -15,6 +16,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllers();
+builder.Services.AddProblemDetails();
+builder.Services.AddExceptionHandler<AuthApiExceptionHandler>();
 
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
@@ -110,6 +113,8 @@ builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSet
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
+app.UseExceptionHandler();
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();

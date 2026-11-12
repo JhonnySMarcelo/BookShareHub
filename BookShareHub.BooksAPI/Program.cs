@@ -1,6 +1,7 @@
 using BookShareHub.Application.Books.Services;
 using BookShareHub.Application.Configurations;
 using BookShareHub.Application.Users.Interfaces;
+using BookShareHub.BooksAPI.ExceptionHandling;
 using BookShareHub.Domain.Books.Repositories;
 using BookShareHub.Infrastructure.Books.Repositories;
 using BookShareHub.Infrastructure.Users.Identity;
@@ -15,6 +16,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllers();
+builder.Services.AddProblemDetails();
+builder.Services.AddExceptionHandler<BooksApiExceptionHandler>();
 
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
@@ -106,6 +109,8 @@ builder.Services.AddSwaggerGen(c =>
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
+app.UseExceptionHandler();
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();

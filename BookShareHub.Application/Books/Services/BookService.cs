@@ -1,5 +1,6 @@
 ﻿using BookShareHub.Application.Books.DTOs.Requests;
 using BookShareHub.Application.Books.DTOs.Responses;
+using BookShareHub.Application.Books.Exceptions;
 using BookShareHub.Application.Books.Mappers;
 using BookShareHub.Domain.Books.Entities;
 using BookShareHub.Domain.Books.Repositories;
@@ -65,7 +66,7 @@ namespace BookShareHub.Application.Books.Services
             if (book == null) return null;
 
             if (!book.Available)
-                throw new InvalidOperationException("Book is currently borrowed and cannot be deleted.");
+                throw new BookUnavailableException();
 
             await _bookRepository.DeleteAsync(id, userId);
 
