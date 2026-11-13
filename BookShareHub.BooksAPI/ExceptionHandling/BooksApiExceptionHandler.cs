@@ -28,11 +28,7 @@ namespace BookShareHub.BooksAPI.ExceptionHandling
         {
             ProblemDetails problemDetails = exception switch
             {
-                InvalidBookIdException => new ValidationProblemDetails(
-                    new Dictionary<string, string[]>
-                    {
-                        ["id"] = ["Book Id cannot be empty."]
-                    })
+                BookValidationException validationException => new ValidationProblemDetails(validationException.Errors)
                 {
                     Status = StatusCodes.Status400BadRequest,
                     Title = "One or more validation errors occurred."

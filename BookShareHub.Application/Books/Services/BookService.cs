@@ -21,12 +21,28 @@ namespace BookShareHub.Application.Books.Services
             if (dto == null)
                 throw new ArgumentNullException(nameof(dto));
 
-            var book = new Book(
-                   dto.Title,
-                   dto.Author,
-                   dto.Description,
-                   dto.Available,
-                   userId);
+            Book book;
+            try
+            {
+                book = new Book(
+                    dto.Title,
+                    dto.Author,
+                    dto.Description,
+                    dto.Available,
+                    userId);
+            }
+            catch (ArgumentException exception) when (exception.ParamName == "title")
+            {
+                throw ToBookValidationException(exception, nameof(CreateBookRequest.Title));
+            }
+            catch (ArgumentException exception) when (exception.ParamName == "author")
+            {
+                throw ToBookValidationException(exception, nameof(CreateBookRequest.Author));
+            }
+            catch (ArgumentException exception) when (exception.ParamName == "description")
+            {
+                throw ToBookValidationException(exception, nameof(CreateBookRequest.Description));
+            }
 
             await _bookRepository.AddAsync(book);
 
@@ -35,8 +51,7 @@ namespace BookShareHub.Application.Books.Services
 
         public async Task<BookResponse?> GetByIdAsync(Guid id, Guid userId)
         {
-            if (id == Guid.Empty)
-                throw new InvalidBookIdException();
+            ThrowIfIdIsEmpty(id);
 
             var book = await _bookRepository.GetByIdForOwnerAsync(id, userId);
 
@@ -59,8 +74,7 @@ namespace BookShareHub.Application.Books.Services
 
         public async Task<bool?> DeleteAsync(Guid id, Guid userId)
         {
-            if (id == Guid.Empty)
-                throw new InvalidBookIdException();
+            ThrowIfIdIsEmpty(id);
 
             var book = await _bookRepository.GetByIdForOwnerAsync(id, userId);
             if (book == null) return null;
@@ -75,8 +89,7 @@ namespace BookShareHub.Application.Books.Services
 
         public async Task<BookResponse?> PatchAsync(Guid id, PatchBookRequest dto, Guid userId)
         {
-            if (id == Guid.Empty)
-                throw new InvalidBookIdException();
+            ThrowIfIdIsEmpty(id);
 
             if (dto == null)
                 throw new ArgumentNullException(nameof(dto));
@@ -86,13 +99,40 @@ namespace BookShareHub.Application.Books.Services
                 return null;
 
             if (dto.Title != null)
-                book.UpdateTitle(dto.Title);
+            {
+                try
+                {
+                    book.UpdateTitle(dto.Title);
+                }
+                catch (ArgumentException exception) when (exception.ParamName == "title")
+                {
+                    throw ToBookValidationException(exception, nameof(PatchBookRequest.Title));
+                }
+            }
 
             if (dto.Author != null)
-                book.UpdateAuthor(dto.Author);
+            {
+                try
+                {
+                    book.UpdateAuthor(dto.Author);
+                }
+                catch (ArgumentException exception) when (exception.ParamName == "author")
+                {
+                    throw ToBookValidationException(exception, nameof(PatchBookRequest.Author));
+                }
+            }
 
             if (dto.Description != null)
-                book.UpdateDescription(dto.Description);
+            {
+                try
+                {
+                    book.UpdateDescription(dto.Description);
+                }
+                catch (ArgumentException exception) when (exception.ParamName == "description")
+                {
+                    throw ToBookValidationException(exception, nameof(PatchBookRequest.Description));
+                }
+            }
 
             if (dto.Available.HasValue)
                 book.UpdateAvailability(dto.Available.Value);
@@ -102,6 +142,25 @@ namespace BookShareHub.Application.Books.Services
                 return null;
 
             return BookMapper.ToResponse(updatedBook, userId);
+        }
+
+        private static void ThrowIfIdIsEmpty(Guid id)
+        {
+            if (id == Guid.Empty)
+            {
+                throw new BookValidationException(new Dictionary<string, string[]>
+                {
+                    [nameof(id)] = ["Book Id cannot be empty."]
+                });
+            }
+        }
+
+        private static BookValidationException ToBookValidationException(ArgumentException exception, string field)
+        {
+            return new BookValidationException(new Dictionary<string, string[]>
+            {
+                [field] = [exception.Message]
+            });
         }
     }
 }

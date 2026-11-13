@@ -54,13 +54,13 @@ namespace BookShareHub.Domain.Books.Entities
         public Book(string title, string author, string? description, bool available, Guid ownerId)
         {
             if (string.IsNullOrWhiteSpace(title))
-                throw new ArgumentException("Book Title is required.");
+                throw new ArgumentException("Book Title is required.", nameof(title));
 
             if (title.Length > MaxTitleLength)
                 throw new ArgumentOutOfRangeException(nameof(title), $"Title cannot exceed {MaxTitleLength} characters.");
 
             if (string.IsNullOrWhiteSpace(author))
-                throw new ArgumentException("Book Author is required.");
+                throw new ArgumentException("Book Author is required.", nameof(author));
 
             if (author.Length > MaxAuthorLength)
                 throw new ArgumentOutOfRangeException(nameof(author), $"Author cannot exceed {MaxAuthorLength} characters.");
@@ -81,7 +81,7 @@ namespace BookShareHub.Domain.Books.Entities
         public void UpdateTitle(string title)
         {
             if (string.IsNullOrWhiteSpace(title))
-                throw new ArgumentException("Book Title is required.");
+                throw new ArgumentException("Book Title is required.", nameof(title));
 
             if (title.Length > MaxTitleLength)
                 throw new ArgumentOutOfRangeException(nameof(title), $"Title cannot exceed {MaxTitleLength} characters.");
@@ -92,7 +92,7 @@ namespace BookShareHub.Domain.Books.Entities
         public void UpdateAuthor(string author)
         {
             if (string.IsNullOrWhiteSpace(author))
-                throw new ArgumentException("Book Author is required.");
+                throw new ArgumentException("Book Author is required.", nameof(author));
 
             if (author.Length > MaxAuthorLength)
                 throw new ArgumentOutOfRangeException(nameof(author), $"Author cannot exceed {MaxAuthorLength} characters.");
