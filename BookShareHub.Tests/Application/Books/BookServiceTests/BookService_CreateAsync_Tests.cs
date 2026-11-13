@@ -1,4 +1,5 @@
 ﻿using BookShareHub.Application.Books.DTOs.Requests;
+using BookShareHub.Application.Books.Exceptions;
 using BookShareHub.Application.Books.Services;
 using BookShareHub.Domain.Books.Entities;
 using BookShareHub.Domain.Books.Repositories;
@@ -90,7 +91,7 @@ namespace BookShareHub.Tests.Application.Books.BookServiceTests
         [Theory]
         [InlineData("")]
         [InlineData("   ")]
-        public async Task Should_Throw_ArgumentException_When_Title_Is_Invalid(
+        public async Task Should_Throw_BookValidationException_When_Title_Is_Invalid(
             string invalidTitle)
         {
             // Arrange
@@ -102,8 +103,9 @@ namespace BookShareHub.Tests.Application.Books.BookServiceTests
             };
 
             // Act & Assert
-            await Assert.ThrowsAsync<ArgumentException>(
+            var exception = await Assert.ThrowsAsync<BookValidationException>(
                 () => _service.CreateAsync(request, Guid.NewGuid()));
+            Assert.Contains(nameof(CreateBookRequest.Title), exception.Errors.Keys);
 
             _bookRepoMock.Verify(
                 r => r.AddAsync(It.IsAny<Book>()),
@@ -113,7 +115,7 @@ namespace BookShareHub.Tests.Application.Books.BookServiceTests
         [Theory]
         [InlineData("")]
         [InlineData("   ")]
-        public async Task Should_Throw_ArgumentException_When_Author_Is_Invalid(
+        public async Task Should_Throw_BookValidationException_When_Author_Is_Invalid(
             string invalidAuthor)
         {
             // Arrange
@@ -125,8 +127,9 @@ namespace BookShareHub.Tests.Application.Books.BookServiceTests
             };
 
             // Act & Assert
-            await Assert.ThrowsAsync<ArgumentException>(
+            var exception = await Assert.ThrowsAsync<BookValidationException>(
                 () => _service.CreateAsync(request, Guid.NewGuid()));
+            Assert.Contains(nameof(CreateBookRequest.Author), exception.Errors.Keys);
 
             _bookRepoMock.Verify(
                 r => r.AddAsync(It.IsAny<Book>()),
@@ -154,7 +157,7 @@ namespace BookShareHub.Tests.Application.Books.BookServiceTests
         }
 
         [Fact]
-        public async Task Should_Throw_ArgumentOutOfRangeException_When_Title_Exceeds_MaxLength()
+        public async Task Should_Throw_BookValidationException_When_Title_Exceeds_MaxLength()
         {
             // Arrange
             var request = new CreateBookRequest
@@ -165,8 +168,9 @@ namespace BookShareHub.Tests.Application.Books.BookServiceTests
             };
 
             // Act & Assert
-            await Assert.ThrowsAsync<ArgumentOutOfRangeException>(
+            var exception = await Assert.ThrowsAsync<BookValidationException>(
                 () => _service.CreateAsync(request, Guid.NewGuid()));
+            Assert.Contains(nameof(CreateBookRequest.Title), exception.Errors.Keys);
 
             _bookRepoMock.Verify(
                 r => r.AddAsync(It.IsAny<Book>()),
@@ -174,7 +178,7 @@ namespace BookShareHub.Tests.Application.Books.BookServiceTests
         }
 
         [Fact]
-        public async Task Should_Throw_ArgumentOutOfRangeException_When_Author_Exceeds_MaxLength()
+        public async Task Should_Throw_BookValidationException_When_Author_Exceeds_MaxLength()
         {
             // Arrange
             var request = new CreateBookRequest
@@ -185,8 +189,9 @@ namespace BookShareHub.Tests.Application.Books.BookServiceTests
             };
 
             // Act & Assert
-            await Assert.ThrowsAsync<ArgumentOutOfRangeException>(
+            var exception = await Assert.ThrowsAsync<BookValidationException>(
                 () => _service.CreateAsync(request, Guid.NewGuid()));
+            Assert.Contains(nameof(CreateBookRequest.Author), exception.Errors.Keys);
 
             _bookRepoMock.Verify(
                 r => r.AddAsync(It.IsAny<Book>()),
@@ -194,7 +199,7 @@ namespace BookShareHub.Tests.Application.Books.BookServiceTests
         }
 
         [Fact]
-        public async Task Should_Throw_ArgumentOutOfRangeException_When_Description_Exceeds_MaxLength()
+        public async Task Should_Throw_BookValidationException_When_Description_Exceeds_MaxLength()
         {
             // Arrange
             var request = new CreateBookRequest
@@ -206,8 +211,9 @@ namespace BookShareHub.Tests.Application.Books.BookServiceTests
             };
 
             // Act & Assert
-            await Assert.ThrowsAsync<ArgumentOutOfRangeException>(
+            var exception = await Assert.ThrowsAsync<BookValidationException>(
                 () => _service.CreateAsync(request, Guid.NewGuid()));
+            Assert.Contains(nameof(CreateBookRequest.Description), exception.Errors.Keys);
 
             _bookRepoMock.Verify(
                 r => r.AddAsync(It.IsAny<Book>()),

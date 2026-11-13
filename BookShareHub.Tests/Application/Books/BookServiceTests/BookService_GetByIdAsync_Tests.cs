@@ -1,4 +1,5 @@
 ﻿
+using BookShareHub.Application.Books.Exceptions;
 using BookShareHub.Application.Books.Services;
 using BookShareHub.Domain.Books.Entities;
 using BookShareHub.Domain.Books.Repositories;
@@ -51,14 +52,15 @@ namespace BookShareHub.Tests.Application.Books.BookServiceTests
         }
 
         [Fact]
-        public async Task Should_Throw_ArgumentException_When_Id_Is_Empty()
+        public async Task Should_Throw_BookValidationException_When_Id_Is_Empty()
         {
             // Arrange
             var id = Guid.Empty;
 
             // Act & Assert
-            await Assert.ThrowsAsync<ArgumentException>(
+            var exception = await Assert.ThrowsAsync<BookValidationException>(
                 () => _service.GetByIdAsync(id, _ownerId));
+            Assert.Contains("id", exception.Errors.Keys);
 
             _bookRepoMock.Verify(
                 r => r.GetByIdForOwnerAsync(It.IsAny<Guid>(), _ownerId),

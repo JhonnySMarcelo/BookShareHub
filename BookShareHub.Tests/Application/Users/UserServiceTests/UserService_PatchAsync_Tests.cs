@@ -163,6 +163,7 @@ namespace BookShareHub.Tests.Application.Users.UserServiceTests
 
             // Assert
             Assert.Contains(nameof(UpdateUserDto.Username), exception.Errors.Keys);
+            Assert.NotEmpty(exception.Errors[nameof(UpdateUserDto.Username)]);
             _userRepoMock.Verify(r => r.PatchAsync(It.IsAny<User>()), Times.Never);
         }
 

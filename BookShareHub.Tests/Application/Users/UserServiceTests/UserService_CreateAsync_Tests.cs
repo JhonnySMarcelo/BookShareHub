@@ -130,6 +130,7 @@ namespace BookShareHub.Tests.Application.Users.UserServiceTests
 
             // Assert
             Assert.Contains(nameof(dto.Username), exception.Errors.Keys);
+            Assert.NotEmpty(exception.Errors[nameof(dto.Username)]);
             _userRepoMock.Verify(r => r.FindAsync(It.IsAny<Dictionary<string, object>>()), Times.Never);
             _userRepoMock.Verify(r => r.AddAsync(It.IsAny<User>()), Times.Never);
         }

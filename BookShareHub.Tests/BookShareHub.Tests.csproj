@@ -17,6 +17,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\BookShareHub.AuthAPI\BookShareHub.AuthAPI.csproj" />
+    <ProjectReference Include="..\BookShareHub.BooksAPI\BookShareHub.BooksAPI.csproj" />
     <ProjectReference Include="..\BookShareHub.Application\BookShareHub.Application.csproj" />
     <ProjectReference Include="..\BookShareHub.Domain\BookShareHub.Domain.csproj" />
   </ItemGroup>

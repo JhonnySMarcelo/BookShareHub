@@ -1,4 +1,5 @@
 ﻿using BookShareHub.Application.Books.DTOs.Requests;
+using BookShareHub.Application.Books.Exceptions;
 using BookShareHub.Application.Books.Services;
 using BookShareHub.Domain.Books.Entities;
 using BookShareHub.Domain.Books.Repositories;
@@ -116,14 +117,15 @@ namespace BookShareHub.Tests.Application.Books.BookServiceTests
         }
 
         [Fact]
-        public async Task Should_Throw_ArgumentException_When_Id_Is_Empty()
+        public async Task Should_Throw_BookValidationException_When_Id_Is_Empty()
         {
             // Arrange
             var emptyId = Guid.Empty;
             var dto = new PatchBookRequest { Title = "New Title" };
 
             // Act & Assert
-            await Assert.ThrowsAsync<ArgumentException>(() => _service.PatchAsync(emptyId, dto, _ownerId));
+            var exception = await Assert.ThrowsAsync<BookValidationException>(() => _service.PatchAsync(emptyId, dto, _ownerId));
+            Assert.Contains("id", exception.Errors.Keys);
 
             _bookRepoMock.Verify(r => r.GetByIdForOwnerAsync(It.IsAny<Guid>(), _ownerId), Times.Never);
             _bookRepoMock.Verify(r => r.PatchAsync(It.IsAny<Book>(), _ownerId), Times.Never);
@@ -145,7 +147,7 @@ namespace BookShareHub.Tests.Application.Books.BookServiceTests
         [Theory]
         [InlineData("")]
         [InlineData("   ")]
-        public async Task Should_Throw_ArgumentException_When_Title_Is_Invalid_On_Patch(string invalidTitle)
+        public async Task Should_Throw_BookValidationException_When_Title_Is_Invalid_On_Patch(string invalidTitle)
         {
             // Arrange
             var book = new Book("Old Title", "Author", "Desc", true, Guid.NewGuid());
@@ -153,7 +155,8 @@ namespace BookShareHub.Tests.Application.Books.BookServiceTests
             var dto = new PatchBookRequest { Title = invalidTitle };
 
             // Act & Assert
-            await Assert.ThrowsAsync<ArgumentException>(() => _service.PatchAsync(book.Id, dto, _ownerId));
+            var exception = await Assert.ThrowsAsync<BookValidationException>(() => _service.PatchAsync(book.Id, dto, _ownerId));
+            Assert.Contains(nameof(PatchBookRequest.Title), exception.Errors.Keys);
 
             _bookRepoMock.Verify(r => r.PatchAsync(It.IsAny<Book>(), _ownerId), Times.Never);
         }
@@ -161,7 +164,7 @@ namespace BookShareHub.Tests.Application.Books.BookServiceTests
         [Theory]
         [InlineData("")]
         [InlineData("   ")]
-        public async Task Should_Throw_ArgumentException_When_Author_Is_Invalid_On_Patch(string invalidAuthor)
+        public async Task Should_Throw_BookValidationException_When_Author_Is_Invalid_On_Patch(string invalidAuthor)
         {
             // Arrange
             var book = new Book("Title", "Old Author", "Desc", true, Guid.NewGuid());
@@ -169,13 +172,14 @@ namespace BookShareHub.Tests.Application.Books.BookServiceTests
             var dto = new PatchBookRequest { Author = invalidAuthor };
 
             // Act & Assert
-            await Assert.ThrowsAsync<ArgumentException>(() => _service.PatchAsync(book.Id, dto, _ownerId));
+            var exception = await Assert.ThrowsAsync<BookValidationException>(() => _service.PatchAsync(book.Id, dto, _ownerId));
+            Assert.Contains(nameof(PatchBookRequest.Author), exception.Errors.Keys);
 
             _bookRepoMock.Verify(r => r.PatchAsync(It.IsAny<Book>(), _ownerId), Times.Never);
         }
 
         [Fact]
-        public async Task Should_Throw_ArgumentOutOfRangeException_When_Title_Exceeds_MaxLength_On_Patch()
+        public async Task Should_Throw_BookValidationException_When_Title_Exceeds_MaxLength_On_Patch()
         {
             // Arrange
             var book = new Book("Valid Title", "Author", "Desc", true, Guid.NewGuid());
@@ -183,13 +187,14 @@ namespace BookShareHub.Tests.Application.Books.BookServiceTests
             var dto = new PatchBookRequest { Title = new string('A', 260) };
 
             // Act & Assert
-            await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => _service.PatchAsync(book.Id, dto, _ownerId));
+            var exception = await Assert.ThrowsAsync<BookValidationException>(() => _service.PatchAsync(book.Id, dto, _ownerId));
+            Assert.Contains(nameof(PatchBookRequest.Title), exception.Errors.Keys);
 
             _bookRepoMock.Verify(r => r.PatchAsync(It.IsAny<Book>(), _ownerId), Times.Never);
         }
 
         [Fact]
-        public async Task Should_Throw_ArgumentOutOfRangeException_When_Author_Exceeds_MaxLength_On_Patch()
+        public async Task Should_Throw_BookValidationException_When_Author_Exceeds_MaxLength_On_Patch()
         {
             // Arrange
             var book = new Book("Valid Title", "Valid Author", "Desc", true, Guid.NewGuid());
@@ -197,13 +202,14 @@ namespace BookShareHub.Tests.Application.Books.BookServiceTests
             var dto = new PatchBookRequest { Author = new string('B', 160) };
 
             // Act & Assert
-            await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => _service.PatchAsync(book.Id, dto, _ownerId));
+            var exception = await Assert.ThrowsAsync<BookValidationException>(() => _service.PatchAsync(book.Id, dto, _ownerId));
+            Assert.Contains(nameof(PatchBookRequest.Author), exception.Errors.Keys);
 
             _bookRepoMock.Verify(r => r.PatchAsync(It.IsAny<Book>(), _ownerId), Times.Never);
         }
 
         [Fact]
-        public async Task Should_Throw_ArgumentOutOfRangeException_When_Description_Exceeds_MaxLength_On_Patch()
+        public async Task Should_Throw_BookValidationException_When_Description_Exceeds_MaxLength_On_Patch()
         {
             // Arrange
             var book = new Book("Valid Title", "Valid Author", "Valid Desc", true, Guid.NewGuid());
@@ -211,7 +217,8 @@ namespace BookShareHub.Tests.Application.Books.BookServiceTests
             var dto = new PatchBookRequest { Description = new string('C', 4001) };
 
             // Act & Assert
-            await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => _service.PatchAsync(book.Id, dto, _ownerId));
+            var exception = await Assert.ThrowsAsync<BookValidationException>(() => _service.PatchAsync(book.Id, dto, _ownerId));
+            Assert.Contains(nameof(PatchBookRequest.Description), exception.Errors.Keys);
 
             _bookRepoMock.Verify(r => r.PatchAsync(It.IsAny<Book>(), _ownerId), Times.Never);
         }
