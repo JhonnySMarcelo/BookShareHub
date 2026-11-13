@@ -36,7 +36,7 @@ namespace BookShareHub.Application.Books.Services
         public async Task<BookResponse?> GetByIdAsync(Guid id, Guid userId)
         {
             if (id == Guid.Empty)
-                throw new ArgumentException("Id cannot be empty.", nameof(id));
+                throw new InvalidBookIdException();
 
             var book = await _bookRepository.GetByIdForOwnerAsync(id, userId);
 
@@ -60,7 +60,7 @@ namespace BookShareHub.Application.Books.Services
         public async Task<bool?> DeleteAsync(Guid id, Guid userId)
         {
             if (id == Guid.Empty)
-                throw new ArgumentException("Book Id cannot be empty.", nameof(id));
+                throw new InvalidBookIdException();
 
             var book = await _bookRepository.GetByIdForOwnerAsync(id, userId);
             if (book == null) return null;
@@ -76,7 +76,7 @@ namespace BookShareHub.Application.Books.Services
         public async Task<BookResponse?> PatchAsync(Guid id, PatchBookRequest dto, Guid userId)
         {
             if (id == Guid.Empty)
-                throw new ArgumentException("Book Id cannot be empty.", nameof(id));
+                throw new InvalidBookIdException();
 
             if (dto == null)
                 throw new ArgumentNullException(nameof(dto));

@@ -1,7 +1,6 @@
 ﻿using BookShareHub.Application.Users.Interfaces;
 using BookShareHub.Application.Users.DTOs.Requests;
 using BookShareHub.Application.Users.DTOs.Responses;
-using BookShareHub.Application.Users.Exceptions;
 using BookShareHub.Application.Users.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -40,6 +39,8 @@ namespace BookShareHub.UsersAPI.Controllers
         /// a <see cref="ValidationProblemDetails"/> with status code 400 if validation fails,
         /// or a <see cref="ProblemDetails"/> with status code 409 if the username or email is already in use.
         /// </returns>
+        /// <response code="400">One or more user fields failed validation.</response>
+        /// <response code="409">The username or email is already in use. Problem type: urn:booksharehub:problem:user-already-exists.</response>
         [HttpPost("register")]
         [AllowAnonymous]
         [ProducesResponseType(typeof(UserResponse), StatusCodes.Status201Created)]
@@ -47,19 +48,8 @@ namespace BookShareHub.UsersAPI.Controllers
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
         public async Task<ActionResult<UserResponse>> Register([FromBody] RegisterUserDto request)
         {
-            try
-            {
-                var user = await _userService.CreateAsync(request);
-                return StatusCode(StatusCodes.Status201Created, user);
-            }
-            catch (UserValidationException exception)
-            {
-                return ValidationProblem(new ValidationProblemDetails(exception.Errors));
-            }
-            catch (UserAlreadyExistsException)
-            {
-                return CreateDuplicateUserConflict();
-            }
+            var user = await _userService.CreateAsync(request);
+            return StatusCode(StatusCodes.Status201Created, user);
         }
 
         /// <summary>
@@ -95,6 +85,9 @@ namespace BookShareHub.UsersAPI.Controllers
         /// - <see cref="StatusCodes.Status401Unauthorized"/> if the request has no valid JWT.
         /// - <see cref="StatusCodes.Status403Forbidden"/> if the authenticated user tries to update another user's profile.
         /// </returns>
+        /// <response code="400">One or more user fields failed validation.</response>
+        /// <response code="404">The user does not exist.</response>
+        /// <response code="409">The username or email is already in use. Problem type: urn:booksharehub:problem:user-already-exists.</response>
         [HttpPatch("me")]
         [Authorize]
         [ProducesResponseType(typeof(UserResponse), StatusCodes.Status200OK)]
@@ -105,21 +98,10 @@ namespace BookShareHub.UsersAPI.Controllers
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         public async Task<ActionResult<UserResponse>> Update([FromBody] UpdateUserDto dto)
         {
-            try
-            {
-                var updatedUser = await _userService.PatchAsync(_currentUser.UserId!.Value, dto);
-                if (updatedUser == null) return NotFound();
+            var updatedUser = await _userService.PatchAsync(_currentUser.UserId!.Value, dto);
+            if (updatedUser == null) return NotFound();
 
-                return Ok(updatedUser);
-            }
-            catch (UserValidationException exception)
-            {
-                return ValidationProblem(new ValidationProblemDetails(exception.Errors));
-            }
-            catch (UserAlreadyExistsException)
-            {
-                return CreateDuplicateUserConflict();
-            }
+            return Ok(updatedUser);
         }
 
         /// <summary>
@@ -145,17 +127,5 @@ namespace BookShareHub.UsersAPI.Controllers
 
             return NoContent();
         }
-        
-        private ConflictObjectResult CreateDuplicateUserConflict()
-        {
-            return Conflict(new ProblemDetails
-            {
-                Type = "about:blank",
-                Title = "Conflict",
-                Status = StatusCodes.Status409Conflict,
-                Detail = "Username or email is already in use."
-            });
-        }
-
     }
 }

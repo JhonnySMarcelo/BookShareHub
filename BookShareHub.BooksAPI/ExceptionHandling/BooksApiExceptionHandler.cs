@@ -28,6 +28,15 @@ namespace BookShareHub.BooksAPI.ExceptionHandling
         {
             ProblemDetails problemDetails = exception switch
             {
+                InvalidBookIdException => new ValidationProblemDetails(
+                    new Dictionary<string, string[]>
+                    {
+                        ["id"] = ["Book Id cannot be empty."]
+                    })
+                {
+                    Status = StatusCodes.Status400BadRequest,
+                    Title = "One or more validation errors occurred."
+                },
                 BookUnavailableException => new ProblemDetails
                 {
                     Type = "urn:booksharehub:problem:book-unavailable",

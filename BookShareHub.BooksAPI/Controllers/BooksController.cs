@@ -59,8 +59,7 @@ namespace BookShareHub.BooksAPI.Controllers
         /// <param name="id">The unique identifier of the book.</param>
         /// <returns>
         /// Returns the <see cref="BookResponse"/> with status code 200 if found,
-        /// or 404 if not found.
-        /// Validation errors (e.g., empty Guid) are automatically returned as <see cref="ValidationProblemDetails"/> with status code 400.
+        /// 404 if not found, or <see cref="ValidationProblemDetails"/> with status code 400 if the ID is empty.
         /// </returns>
         [HttpGet("{id:guid}")]
         [Authorize]
@@ -101,7 +100,7 @@ namespace BookShareHub.BooksAPI.Controllers
         /// <returns>
         /// Returns the updated <see cref="BookResponse"/> with status code 200 if successful,
         /// 404 if not found,
-        /// or 400 if validation fails.
+        /// or <see cref="ValidationProblemDetails"/> with status code 400 if validation fails.
         /// </returns>
         [HttpPatch("{id:guid}")]
         [Authorize]
@@ -128,14 +127,18 @@ namespace BookShareHub.BooksAPI.Controllers
         /// Returns:
         /// - <see cref="StatusCodes.Status204NoContent"/> if the book was successfully deleted.
         /// - <see cref="StatusCodes.Status404NotFound"/> if the book does not exist.
-        /// - <see cref="ValidationProblemDetails"/> with <see cref="StatusCodes.Status400BadRequest"/> 
-        ///   if the provided <paramref name="id"/> is invalid or the book is unavailable.
+        /// - <see cref="ValidationProblemDetails"/> with <see cref="StatusCodes.Status400BadRequest"/> if the ID is empty.
+        /// - <see cref="ProblemDetails"/> with <see cref="StatusCodes.Status409Conflict"/> if the book is unavailable.
         /// </returns>
+        /// <response code="400">The book ID is empty.</response>
+        /// <response code="404">The book does not exist.</response>
+        /// <response code="409">The book is currently borrowed and cannot be deleted. Problem type: urn:booksharehub:problem:book-unavailable.</response>
         [HttpDelete("{id:guid}")]
         [Authorize]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
         public async Task<IActionResult> Delete(Guid id)
         {
             var result = await _bookService.DeleteAsync(id, _currentUser.UserId!.Value);
